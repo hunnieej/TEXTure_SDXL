@@ -186,7 +186,7 @@ class SDXL(nn.Module):
                                         num_train_timesteps=self.num_train_timesteps, steps_offset=1, 
                                         use_karras_sigmas=True)
         
-        # NOTE : Diffusers version update required 
+        # NOTE : Diffusers version update required, Version mismatch for diffusers 0.21.3
         # self.DPMSolver_scheduler = DPMSolverMultistepScheduler(beta_start=0.00085, beta_end=0.012, beta_schedule="scaled_linear",
         #                                 num_train_timesteps=self.num_train_timesteps, steps_offset=1, 
         #                                 use_karras_sigmas=True, sde_type="sde-dpmsolver++",
