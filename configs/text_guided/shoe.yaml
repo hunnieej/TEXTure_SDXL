@@ -1,0 +1,13 @@
+log:
+  exp_name: shoe
+guide:
+  text: 
+    - "A shoe with a smooth leather texture and a polished brown finish, {} view"
+    - "A shoe with a rough suede texture in dark grey tones, {} view"
+    - "A shoe with a shiny patent leather texture and a black gloss finish, {} view"
+    - "A shoe with a cracked, weathered texture resembling aged leather, {} view"
+    - "A shoe with a woven fabric texture and subtle beige patterns, {} view"
+  append_direction: True
+  shape_path: shapes/shoe.obj
+optim:
+  seed: 3

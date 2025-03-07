@@ -55,11 +55,13 @@ class StableDiffusion(nn.Module):
         # 3. The UNet model for generating the latents.
         self.unet = UNet2DConditionModel.from_pretrained(model_name, subfolder="unet", use_auth_token=self.token).to(
             self.device)
+        # print("channels", self.unet.config.in_channels) # val = 5
 
         if self.use_inpaint:
             self.inpaint_unet = UNet2DConditionModel.from_pretrained("stabilityai/stable-diffusion-2-inpainting",
                                                                      subfolder="unet", use_auth_token=self.token).to(
                 self.device)
+            # print("inpaint channels", self.unet.config.in_channels) #5
 
 
         # 4. Create a scheduler for inference
@@ -72,6 +74,10 @@ class StableDiffusion(nn.Module):
         if concept_name is not None:
             self.load_concept(concept_name, concept_path)
         logger.info(f'\t successfully loaded stable diffusion!')
+
+        # try to save entire model architecture nn.module in a txt file for debugging
+        #with open('model_architecture.txt', 'w') as f:
+        #     f.write(str(self))
 
     def load_concept(self, concept_name, concept_path=None):
         # NOTE: No need for both name and path, they are the same!
@@ -134,7 +140,7 @@ class StableDiffusion(nn.Module):
         return text_embeddings
 
     def img2img_single_step(self, text_embeddings, prev_latents, depth_mask, step, guidance_scale=100):
-        # input is 1 3 512 512
+        # input is 1 3 512 512 #Q_t
         # depth_mask is 1 1 512 512
         # text_embeddings is 2 512
 

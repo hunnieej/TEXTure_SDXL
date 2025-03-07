@@ -1,0 +1,8 @@
+log:
+  exp_name: alien_4
+guide:
+  text: A crystal-like alien that appears translucent and refracts light into rainbows, {} view
+  append_direction: true
+  shape_path: shapes/alien.obj
+optim:
+  seed: 3

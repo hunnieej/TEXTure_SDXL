@@ -10,8 +10,9 @@ from PIL import Image
 
 @dataclass
 class RunConfig:
-    diffusion_model_name: str = 'stabilityai/stable-diffusion-2-depth'
     images_dir: Path
+    diffusion_model_name: str = 'stabilityai/stable-diffusion-2-depth'
+    # images_dir: Path
 
 
 @pyrallis.wrap()

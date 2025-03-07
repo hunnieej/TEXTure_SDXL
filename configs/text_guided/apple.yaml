@@ -1,0 +1,13 @@
+log:
+  exp_name: apple
+guide:
+  text: 
+    - "A shiny red apple with a polished, reflective surface like ceramic, {} view"
+    - "An apple covered in a soft velvet texture with a matte finish, {} view"
+    - "A golden apple with intricate engraved patterns and a metallic shine, {} view"
+    - "An apple with a rough, bark-like texture as if made from tree wood, {} view"
+    - "A transparent apple made entirely of glass, with light refracting through it, {} view"
+  append_direction: True
+  shape_path: shapes/apple.obj
+optim:
+  seed: 3

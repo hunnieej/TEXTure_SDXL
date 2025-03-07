@@ -1,0 +1,13 @@
+log:
+  exp_name: person
+guide:
+  text: 
+    - "A person with realistic skin texture featuring freckles and slight blemishes, {} view"
+    - "A person with cartoon-style smooth skin and vibrant tones, {} view"
+    - "A person with a cybernetic body and glowing blue circuits, {} view"
+    - "A person carved from stone with cracks and weathering, {} view"
+    - "A person as a golden sculpture with polished reflective surfaces, {} view"
+  append_direction: True
+  shape_path: shapes/person.obj
+optim:
+  seed: 3

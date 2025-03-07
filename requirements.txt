@@ -1,5 +1,5 @@
-torch==1.12.1
-torchvision==0.13.1
+#torch==2.0.1_cu118
+#torchvision==0.15.2
 transformers
 diffusers
 accelerate

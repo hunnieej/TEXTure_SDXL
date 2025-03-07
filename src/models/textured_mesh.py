@@ -219,7 +219,8 @@ class TexturedMeshModel(nn.Module):
             num_backgrounds, self.env_sphere.faces.shape[0],
             3, self.num_features, dtype=torch.float32).cuda()
         background_sphere_colors = nn.Parameter(modulated_init_background_bases_latent.cuda())
-
+        
+        # Texture 없는 mesh의 경우, 초기 texture를 생성
         if self.initial_texture_path is not None:
             texture = torch.Tensor(np.array(Image.open(self.initial_texture_path).resize(
                 (self.texture_resolution, self.texture_resolution)))).permute(2, 0, 1).cuda().unsqueeze(0) / 255.0

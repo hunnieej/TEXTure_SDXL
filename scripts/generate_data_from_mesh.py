@@ -47,17 +47,18 @@ def main(cfg: RunConfig):
     utils.seed_everything(18)
 
     from src.models.textured_mesh import TexturedMeshModel
+    #GuideConfig를 이용하여 TexturedMeshModel을 생성
     model = TexturedMeshModel(guide_cfg, device=device, render_grid_size=cfg.render_size,
                               cache_path=cfg.render_dir,
-                              initial_texture_path=cfg.initial_texture_path,
+                              #initial_texture_path=cfg.initial_texture_path,
+                              initial_texture_path=None,
                               texture_resolution=cfg.texture_resolution, augmentations=cfg.augmentations).to(device)
     model.eval()
     cfg.render_dir.mkdir(parents=True, exist_ok=True)
     dirs = ['front', 'left', 'back', 'right', 'overhead', 'bottom']
-
     count_per_view = {d: 0 for d in dirs}
     global_ind = 0
-    while not all([c >= 256 for c in count_per_view.values()]):
+    while not all([c >= 256 for c in count_per_view.values()]): #default 256
         dataloader = ViewsDataset(render_cfg, device=device, size=10000, random_views=True).dataloader()
         # Initialize dict with zero for every dir
         for i, data in enumerate(dataloader):
@@ -65,6 +66,7 @@ def main(cfg: RunConfig):
             phi = data['phi']
             radius = data['radius']
             dir = dirs[data['dir']]
+            print(f"dir: {dir}, theta: {theta}, phi: {phi}, radius: {radius}")
             if count_per_view[dir] >= 256:
                 # Break if all are above 32
                 if all([c >= 256 for c in count_per_view.values()]):

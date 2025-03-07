@@ -163,10 +163,10 @@ class ViewsDataset:
     def collate(self, index):
         # circle pose
 
-        if self.random_views:
+        if self.random_views: # random poses
             dirs, thetas, phis, radius = rand_poses(len(index), self.device)
-        else:
-
+        else: # circle poses ; 지금은 이걸로 SETTING
+            print(len(index))
             phi = (index[0] / self.size) * 360
             dirs, thetas, phis, radius = circle_poses(self.device, radius=self.cfg.radius * 1.2,
                                                       theta=self.cfg.base_theta,
@@ -181,6 +181,7 @@ class ViewsDataset:
             'radius': radius
         }
 
+
         return data
 
     def dataloader(self):
@@ -188,3 +189,47 @@ class ViewsDataset:
                             num_workers=0)
         loader._data = self  # an ugly fix... we need to access dataset in trainer.
         return loader
+
+# class ViewsDataset:
+#     def __init__(self, cfg: RenderConfig, device, size=100, random_views=False, fixed_views=None):
+#         super().__init__()
+
+#         self.cfg = cfg
+#         self.device = device
+#         self.random_views = random_views
+#         self.size = size
+
+#         # 사용자가 원하는 특정 각도를 직접 지정할 수 있도록 추가 (None 체크 포함)
+#         self.fixed_views = fixed_views if fixed_views is not None else []
+
+#     def collate(self, index):
+#         # 특정한 각도 설정이 있는 경우
+#         if self.fixed_views is not None and len(self.fixed_views) > 0:
+#             idx = index[0] % len(self.fixed_views)  # 순환 사용 가능
+#             # print(index[0], len(self.fixed_views), idx)
+#             theta, phi, radius = self.fixed_views[idx]
+#             dirs = idx  # 방향 ID (사용자가 설정한 순서)
+#         elif self.random_views:
+#             dirs, thetas, phis, radius = rand_poses(len(index), self.device)
+#         else:
+#             phi = (index[0] / self.size) * 360
+#             dirs, thetas, phis, radius = circle_poses(self.device, radius=self.cfg.radius * 1.2,
+#                                                       theta=self.cfg.base_theta,
+#                                                       phi=phi,
+#                                                       angle_overhead=self.cfg.overhead_range,
+#                                                       angle_front=self.cfg.front_range)
+
+#         data = {
+#             'dir': dirs if not self.fixed_views else idx,
+#             'theta': theta if self.fixed_views else thetas,
+#             'phi': phi if self.fixed_views else phis,
+#             'radius': radius
+#         }
+
+#         return data
+
+#     def dataloader(self):
+#         dataset_size = len(self.fixed_views) if self.fixed_views else self.size
+#         loader = DataLoader(list(range(dataset_size)), batch_size=1, collate_fn=self.collate, shuffle=False, num_workers=0)
+#         loader._data = self  # an ugly fix... we need to access dataset in trainer.
+#         return loader

@@ -1,0 +1,13 @@
+log:
+  exp_name: alien1
+guide:
+  text:
+    - "A futuristic alien with a metallic silver texture that reflects light like a mirror, {} view"
+    - "An alien with a scaly, reptilian texture in shades of green and gold, {} view"
+    - "An alien covered in a soft, glowing neon blue material with pulsating patterns, {} view"
+    - "A crystal-like alien that appears translucent and refracts light into rainbows, {} view"
+    - "An alien with a rugged, volcanic rock texture and glowing cracks, {} view"
+  append_direction: True
+  shape_path: shapes/alien.obj
+optim:
+  seed: 3

@@ -1,0 +1,13 @@
+log:
+  exp_name: lamp
+guide:
+  text: 
+    - "A lamp with a frosted glass shade, softly diffusing warm light, {} view"
+    - "A lamp made of shiny, polished brass with intricate engravings, {} view"
+    - "A lamp with a woven rattan texture, blending natural fibers, {} view"
+    - "A lamp with a glowing, futuristic neon texture, emitting blue and green light, {} view"
+    - "A lamp made of rough, rustic clay with earthy tones and uneven patterns, {} view"
+  append_direction: True
+  shape_path: shapes/lamp.obj
+optim:
+  seed: 3

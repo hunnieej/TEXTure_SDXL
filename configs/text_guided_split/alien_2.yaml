@@ -1,0 +1,8 @@
+log:
+  exp_name: alien_2
+guide:
+  text: An alien with a scaly, reptilian texture in shades of green and gold, {} view
+  append_direction: true
+  shape_path: shapes/alien.obj
+optim:
+  seed: 3

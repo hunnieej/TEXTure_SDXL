@@ -1,0 +1,13 @@
+log:
+  exp_name: strawberry
+guide:
+  text: 
+    - "A strawberry with a bright red surface and tiny yellow seeds, {} view"
+    - "A frosted strawberry with a sugary coating, {} view"
+    - "A cartoon strawberry with exaggerated seeds and a glossy finish, {} view"
+    - "A half-ripe strawberry with green and red gradients, {} view"
+    - "A chocolate-dipped strawberry with a shiny coating, {} view"
+  append_direction: True
+  shape_path: shapes/strawberry.obj
+optim:
+  seed: 3

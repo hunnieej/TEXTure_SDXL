@@ -1,0 +1,13 @@
+log:
+  exp_name: monkey
+guide:
+  text: 
+    - "A monkey with realistic fur texture featuring brown and golden highlights, {} view"
+    - "A monkey with cartoonish skin and smooth shading, {} view"
+    - "A monkey painted with tribal red and white patterns, {} view"
+    - "A monkey with a metallic bronze finish, {} view"
+    - "A monkey carved from stone with moss accents, {} view"
+  append_direction: True
+  shape_path: shapes/monkey.obj
+optim:
+  seed: 3

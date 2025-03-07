@@ -1,0 +1,8 @@
+log:
+  exp_name: alien_3
+guide:
+  text: An alien covered in a soft, glowing neon blue material with pulsating patterns, {} view
+  append_direction: true
+  shape_path: shapes/alien.obj
+optim:
+  seed: 3

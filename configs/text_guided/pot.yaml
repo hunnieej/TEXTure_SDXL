@@ -1,0 +1,13 @@
+log:
+  exp_name: pot
+guide:
+  text: 
+    - "A ceramic pot with blue and white floral patterns, {} view"
+    - "A rustic clay pot with earthy tones and rough textures, {} view"
+    - "A glossy porcelain pot with a smooth finish, {} view"
+    - "A terracotta pot with cracks and weathered details, {} view"
+    - "A metallic pot with a brushed copper finish, {} view"
+  append_direction: True
+  shape_path: shapes/pot.obj
+optim:
+  seed: 3

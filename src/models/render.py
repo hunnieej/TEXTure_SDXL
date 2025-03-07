@@ -85,6 +85,7 @@ class Renderer:
 
             depth_map, _ = kal.render.mesh.rasterize(dims[1], dims[0], face_vertices_camera[:, :, :, -1],
                                                               face_vertices_image, face_vertices_camera[:, :, :, -1:])
+            #print(depth_map)
             depth_map = self.normalize_depth(depth_map)
 
             uv_features, face_idx = kal.render.mesh.rasterize(dims[1], dims[0], face_vertices_camera[:, :, :, -1],

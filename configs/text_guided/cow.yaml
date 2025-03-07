@@ -1,0 +1,13 @@
+log:
+  exp_name: cow
+guide:
+  text: 
+    - "A cow with a realistic hide texture in black and white patterns, {} view"
+    - "A cow made of rough burlap fabric, with visible stitching details, {} view"
+    - "A cow with a shiny, polished chrome texture, reflecting its surroundings, {} view"
+    - "A cow covered in soft, moss-like texture, blending green and brown tones, {} view"
+    - "A cow with a cracked, dried mud texture, as if it's made from clay, {} view"
+  append_direction: True
+  shape_path: shapes/cow.obj
+optim:
+  seed: 3

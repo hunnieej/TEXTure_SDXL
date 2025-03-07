@@ -1,0 +1,38 @@
+StableDiffusionXLControlNetPipeline {
+  "_class_name": "StableDiffusionXLControlNetPipeline",
+  "_diffusers_version": "0.21.3",
+  "_name_or_path": "stabilityai/stable-diffusion-xl-base-1.0",
+  "controlnet": [
+    "diffusers",
+    "ControlNetModel"
+  ],
+  "force_zeros_for_empty_prompt": true,
+  "scheduler": [
+    "diffusers",
+    "EulerDiscreteScheduler"
+  ],
+  "text_encoder": [
+    "transformers",
+    "CLIPTextModel"
+  ],
+  "text_encoder_2": [
+    "transformers",
+    "CLIPTextModelWithProjection"
+  ],
+  "tokenizer": [
+    "transformers",
+    "CLIPTokenizer"
+  ],
+  "tokenizer_2": [
+    "transformers",
+    "CLIPTokenizer"
+  ],
+  "unet": [
+    "diffusers",
+    "UNet2DConditionModel"
+  ],
+  "vae": [
+    "diffusers",
+    "AutoencoderKL"
+  ]
+}

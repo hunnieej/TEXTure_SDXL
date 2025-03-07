@@ -1,7 +1,12 @@
 log:
   exp_name: napoleon
 guide:
-  text: "A photo of Napoleon Bonaparte, {} view"
+  text: 
+    - "Napoleon in a military uniform with blue and gold embroidery, {} view"
+    - "Napoleon with worn leather boots and a weathered cape, {} view"
+    - "Napoleon as a stone statue with cracks and ivy details, {} view"
+    - "Napoleon in golden armor with intricate designs and a red cape, {} view"
+    - "Napoleon in a historical painting style with soft brush textures, {} view"
   append_direction: True
   shape_path: shapes/napoleon.obj
 optim:

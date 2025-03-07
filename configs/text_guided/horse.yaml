@@ -1,0 +1,13 @@
+log:
+  exp_name: horse
+guide:
+  text: 
+    - "A horse with a sleek, shiny coat in shades of deep brown and black, {} view"
+    - "A horse made of rough stone, like an ancient statue in a ruin, {} view"
+    - "A horse with a velvety texture, soft to the touch and rich in color, {} view"
+    - "A horse covered in metallic armor, with intricate engravings and gold highlights, {} view"
+    - "A horse with a glowing, ethereal texture, as if made of pure light, {} view"
+  append_direction: True
+  shape_path: shapes/horse.obj
+optim:
+  seed: 3

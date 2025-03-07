@@ -1,0 +1,13 @@
+log:
+  exp_name: sphere
+guide:
+  text: 
+    - "A sphere made of polished marble with grey and white veins, {} view"
+    - "A sphere with a mirror-like surface and high reflectivity, {} view"
+    - "A sphere with a rusty metallic surface and visible scratches, {} view"
+    - "A sphere made of frosted glass with a translucent finish, {} view"
+    - "A sphere made of wood with a smooth varnished surface, {} view"
+  append_direction: True
+  shape_path: shapes/sphere.obj
+optim:
+  seed: 3

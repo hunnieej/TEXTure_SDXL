@@ -1,7 +1,12 @@
 log:
   exp_name: nascar
 guide:
-  text: "A next gen nascar, {} view"
+  text: 
+    - "A NASCAR car with glossy paint and bright red and blue stripes, {} view"
+    - "A NASCAR car with weathered surfaces, scratches, and dirt marks, {} view"
+    - "A NASCAR car with a sleek black and silver carbon fiber texture, {} view"
+    - "A NASCAR car with a metallic finish and neon sponsor logos, {} view"
+    - "A NASCAR car with a classic checkered flag design in white and black, {} view"
   diffusion_name: stabilityai/stable-diffusion-2-depth
   shape_scale: 0.6
   append_direction: True

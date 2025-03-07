@@ -1,0 +1,8 @@
+log:
+  exp_name: rabbit_4
+guide:
+  text: A rabbit carved from stone with moss details, {} view
+  append_direction: true
+  shape_path: shapes/rabbit.obj
+optim:
+  seed: 3

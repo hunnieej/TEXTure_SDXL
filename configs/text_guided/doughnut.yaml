@@ -1,0 +1,14 @@
+log:
+  exp_name: doughnut
+guide:
+  text: 
+    - "A doughnut with a glossy chocolate glaze and colorful sprinkles, {} view"
+    - "A doughnut made of fluffy, spongy material, like a real baked good, {} view"
+    - "A doughnut covered in shiny metallic gold with a reflective finish, {} view"
+    - "A doughnut with a rough, sugary coating texture, sparkling in the light, {} view"
+    - "A doughnut made of smooth, translucent glass with pastel-colored swirls, {} view"
+
+  append_direction: True
+  shape_path: shapes/doughnut.obj
+optim:
+  seed: 3

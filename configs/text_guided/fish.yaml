@@ -1,0 +1,13 @@
+log:
+  exp_name: fish
+guide:
+  text: 
+    - "A fish with shimmering, scaly skin reflecting shades of blue and green, {} view"
+    - "A fish made of smooth, polished wood with natural grain patterns, {} view"
+    - "A fish with a glowing neon texture, as if swimming in a futuristic aquarium, {} view"
+    - "A fish covered in rough, volcanic rock texture with glowing orange cracks, {} view"
+    - "A fish with a translucent jelly-like body, glowing faintly in pink, {} view"
+  append_direction: True
+  shape_path: shapes/fish.obj
+optim:
+  seed: 3

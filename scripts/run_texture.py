@@ -9,6 +9,7 @@ def main(cfg: TrainConfig):
     trainer = TEXTure(cfg)
     if cfg.log.eval_only:
         trainer.full_eval()
+        #10번 painting 다 하고 나서 obj, v, vt, f 저장(model export mesh 함수 작동)
     else:
         trainer.paint()
 

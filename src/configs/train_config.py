@@ -20,7 +20,7 @@ class RenderConfig:
     # The front offset, use to rotate shape from code
     front_offset: float = 0.0
     # Number of views to use
-    n_views: int = 8
+    n_views: int = 8 # phi 관련
     # Theta value for rendering during training
     base_theta: float = 60
     # Additional views to use before rotating around shape
@@ -35,7 +35,8 @@ class RenderConfig:
 class GuideConfig:
     """ Parameters defining the guidance """
     # Guiding text prompt
-    text: str
+    text: str #original code for one prompt
+    #text: List[str] = field(default_factory=list)
     # The mesh to paint
     shape_path: str = 'shapes/spot_triangulated.obj'
     # Append direction to text prompts
@@ -45,7 +46,8 @@ class GuideConfig:
     # Path to the TI embedding
     concept_path: Optional[Path] = None
     # A huggingface diffusion model to use
-    diffusion_name: str = 'stabilityai/stable-diffusion-2-depth'
+    #diffusion_name: str = 'stabilityai/stable-diffusion-2-depth'
+    diffusion_name: str = 'stabilityai/stable-diffusion-xl-base-1.0'
     # Scale of mesh in 1x1x1 cube
     shape_scale: float = 0.6
     # height of mesh
@@ -58,6 +60,8 @@ class GuideConfig:
     guidance_scale: float = 7.5
     # Use inpainting in relevant iterations
     use_inpainting: bool = True
+    # Use autodepth extraction in relevant iterations
+    use_autodepthing: bool = False
     # The texture before editing
     reference_texture: Optional[Path] = None
     # The edited texture
@@ -65,9 +69,11 @@ class GuideConfig:
     # Whether to use background color or image
     use_background_color: bool = False
     # Background image to use
-    background_img: str = 'textures/brick_wall.png'
+    background_img: str = 'textures/no_bg.png'
+    # background_img: str = 'textures/brick_wall.png'
+    # background_img: str = None
     # Threshold for defining refine regions
-    z_update_thr: float = 0.2
+    z_update_thr: float = 0.3
     # Some more strict masking for projecting back
     strict_projection: bool = True
 
@@ -93,7 +99,7 @@ class LogConfig:
     # Experiment name
     exp_name: str
     # Experiment output dir
-    exp_root: Path = Path('experiments/')
+    exp_root: Path = Path('experiments/SDXL_test_21')
     # Run only test
     eval_only: bool = False
     # Number of angles to sample for eval during training

@@ -1,0 +1,8 @@
+log:
+  exp_name: fish_t1
+guide:
+  text: A fish with cartoon-style shimmering, scaly skin reflecting shades of blue and green, {} view
+  append_direction: true
+  shape_path: shapes/fish.obj
+optim:
+  seed: 3

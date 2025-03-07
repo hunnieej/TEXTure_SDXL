@@ -1,0 +1,8 @@
+log:
+  exp_name: alien_1
+guide:
+  text: A futuristic alien with a metallic silver texture that reflects light like a mirror, {} view
+  append_direction: true
+  shape_path: shapes/alien.obj
+optim:
+  seed: 3

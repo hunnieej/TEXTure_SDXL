@@ -1,0 +1,5 @@
+render_name: rabbit_t2_6v
+shape_path: shapes/rabbit.obj
+# initial_texture_path: textures/rabbit.png
+initial_texture_path: ~ #None으로 들어감
+front_offset: 180

@@ -1,0 +1,13 @@
+log:
+  exp_name: candle
+guide:
+  text: 
+    - "A candle with a glossy, melted wax texture in shades of red and orange, {} view"
+    - "A candle covered in a frosted glass texture, with light softly diffusing through it, {} view"
+    - "A candle with a rough, rustic wood texture, as if carved from driftwood, {} view"
+    - "A candle made of polished obsidian, shiny and reflective in deep black, {} view"
+    - "A candle covered in a glittery, sparkling texture, like it's coated with gold dust, {} view"
+  append_direction: True
+  shape_path: shapes/candle.obj
+optim:
+  seed: 3

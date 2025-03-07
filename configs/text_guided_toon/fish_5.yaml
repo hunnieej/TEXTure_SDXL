@@ -1,0 +1,8 @@
+log:
+  exp_name: fish_t5
+guide:
+  text: A fish with a cartoon-style translucent jelly-like body, glowing faintly in pink, {} view
+  append_direction: true
+  shape_path: shapes/fish.obj
+optim:
+  seed: 3

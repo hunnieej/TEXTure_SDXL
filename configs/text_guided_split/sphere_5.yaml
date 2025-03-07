@@ -1,0 +1,8 @@
+log:
+  exp_name: sphere_5
+guide:
+  text: A sphere made of wood with a smooth varnished surface, {} view
+  append_direction: true
+  shape_path: shapes/sphere.obj
+optim:
+  seed: 3
