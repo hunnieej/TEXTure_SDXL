@@ -72,7 +72,7 @@ class GuideConfig:
     background_img: str = 'textures/no_bg.png'
     # background_img: str = 'textures/brick_wall.png'
     # background_img: str = None
-    # Threshold for defining refine regions
+    # Threshold for defining refine regions # 0.2
     z_update_thr: float = 0.3
     # Some more strict masking for projecting back
     strict_projection: bool = True
@@ -99,7 +99,7 @@ class LogConfig:
     # Experiment name
     exp_name: str
     # Experiment output dir
-    exp_root: Path = Path('experiments/SDXL_test_21')
+    exp_root: Path = Path('experiments/SDXL_test_23')
     # Run only test
     eval_only: bool = False
     # Number of angles to sample for eval during training

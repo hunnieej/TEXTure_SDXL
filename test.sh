@@ -24,11 +24,11 @@ yaml_files=(
 
 # 로그 파일 저장 경로
 mkdir -p logs
-log_file="logs/log_sdxl_test_21.txt"
+log_file="logs/log_sdxl_test_23.txt"
 echo "Execution Log" > $log_file
 echo "==========================" >> $log_file
 echo "T18" >> $log_file
-echo "Scheduler : DPMMultstepscheduler" >> $log_file
+echo "Scheduler : DPMMultstepscheduler with kerras_sigmas=True + euler_at_final=True, use_lu_lambdas=True" >> $log_file
 echo "diff seed for rabbit2" >> $log_file
 echo "threshold for refine 0.2 -> 0.3" >> $log_file
 

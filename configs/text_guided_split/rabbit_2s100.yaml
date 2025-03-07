@@ -1,8 +1,0 @@
-log:
-  exp_name: rabbit_2s100
-guide:
-  text: A rabbit with cartoon-style pastel pink and white fur, {} view
-  append_direction: true
-  shape_path: shapes/rabbit.obj
-optim:
-  seed: 100

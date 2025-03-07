@@ -16,7 +16,9 @@
 
 from diffusers import (AutoencoderKL, UNet2DConditionModel, ControlNetModel, 
                        StableDiffusionXLControlNetPipeline,
-                       PNDMScheduler, LMSDiscreteScheduler, DDIMScheduler, DPMSolverMultistepScheduler)
+                       )
+from diffusers.schedulers import (PNDMScheduler, DDIMScheduler, 
+                                  LMSDiscreteScheduler, DPMSolverMultistepScheduler)
 from diffusers.pipelines.controlnet.multicontrolnet import MultiControlNetModel
 import inspect
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
@@ -164,10 +166,12 @@ class SDXL(nn.Module):
         
         # 5. Scheduler
         # NOTE : Scheduler Issue
+        # NOTE : Diffusion Scheduler Lists : https://huggingface.co/docs/diffusers/en/api/schedulers/overview
         # NOTE : Kerras -> SDXL 기본
         # NOTE : DPM++Solver의 50단계 이하 timestep에서의 단점과 해결 방안
         # https://github.com/huggingface/diffusers/pull/5541
-        
+        # Scheme 1 :add use_lu_lambdas ; uniform intervals for log-SNR
+        # SCheme 2 : add use euler_at_final
 
         self.PNDMS_scheduler = PNDMScheduler(beta_start=0.00085, beta_end=0.012, beta_schedule="scaled_linear",
                                        num_train_timesteps=self.num_train_timesteps, steps_offset=1,
@@ -179,7 +183,14 @@ class SDXL(nn.Module):
         self.LMSDiscrete_scheduler = LMSDiscreteScheduler(beta_start=0.00085, beta_end=0.012, beta_schedule="scaled_linear",
                                         num_train_timesteps=self.num_train_timesteps, steps_offset=1)
         self.DPMSolver_scheduler = DPMSolverMultistepScheduler(beta_start=0.00085, beta_end=0.012, beta_schedule="scaled_linear",
-                                        num_train_timesteps=self.num_train_timesteps, steps_offset=1)
+                                        num_train_timesteps=self.num_train_timesteps, steps_offset=1, 
+                                        use_karras_sigmas=True)
+        
+        # NOTE : Diffusers version update required 
+        # self.DPMSolver_scheduler = DPMSolverMultistepScheduler(beta_start=0.00085, beta_end=0.012, beta_schedule="scaled_linear",
+        #                                 num_train_timesteps=self.num_train_timesteps, steps_offset=1, 
+        #                                 use_karras_sigmas=True, sde_type="sde-dpmsolver++",
+        #                                 euler_at_final=True, use_lu_lambdas=True)
         
         self.scheduler = self.DPMSolver_scheduler
         
