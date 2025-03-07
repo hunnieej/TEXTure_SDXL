@@ -1,7 +1,7 @@
 # TEXTure: Text-Guided Texturing of 3D Shapes
 ## Description
-Implementation of TEXTurePaper(SIGGRAPH, 2024) with SDXL models </br>
-All copyrights belong to original developer
+- Implementation of TEXTurePaper(SIGGRAPH, 2023) with SDXL models </br>
+- All copyrights belong to original developer
 
 https://user-images.githubusercontent.com/14039317/216840512-e83f71cf-beb0-4450-bad8-cd84399197ce.mp4
 
