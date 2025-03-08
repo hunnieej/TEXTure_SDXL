@@ -22,7 +22,7 @@ class RenderConfig:
     # Number of views to use
     n_views: int = 8 # phi 관련
     # Theta value for rendering during training
-    base_theta: float = 60
+    base_theta: float = 40
     # Additional views to use before rotating around shape
     views_before: List[Tuple[float, float]] = field(default_factory=list)
     # Additional views to use after rotating around shape
@@ -99,7 +99,7 @@ class LogConfig:
     # Experiment name
     exp_name: str
     # Experiment output dir
-    exp_root: Path = Path('experiments/SDXL_test_23')
+    exp_root: Path = Path('experiments/SDXL_test_24')
     # Run only test
     eval_only: bool = False
     # Number of angles to sample for eval during training

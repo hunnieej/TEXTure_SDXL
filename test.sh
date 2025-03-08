@@ -9,9 +9,6 @@ yaml_files=(
     "configs/text_guided_split/alien_5.yaml"
     "configs/text_guided_split/rabbit_1.yaml"
     "configs/text_guided_split/rabbit_2.yaml"
-    "configs/text_guided_split/rabbit_2s5.yaml"
-    "configs/text_guided_split/rabbit_2s10.yaml"
-    "configs/text_guided_split/rabbit_2s100.yaml"
     "configs/text_guided_split/rabbit_3.yaml"
     "configs/text_guided_split/rabbit_4.yaml"
     "configs/text_guided_split/rabbit_5.yaml" 
@@ -24,13 +21,12 @@ yaml_files=(
 
 # 로그 파일 저장 경로
 mkdir -p logs
-log_file="logs/log_sdxl_test_23.txt"
+log_file="logs/log_sdxl_test_24.txt"
 echo "Execution Log" > $log_file
 echo "==========================" >> $log_file
 echo "T18" >> $log_file
-echo "Scheduler : DPMMultstepscheduler with kerras_sigmas=True + euler_at_final=True, use_lu_lambdas=True" >> $log_file
-echo "diff seed for rabbit2" >> $log_file
-echo "threshold for refine 0.2 -> 0.3" >> $log_file
+echo "Scheduler : DPMMultstepscheduler with kerras_sigmas=True" >> $log_file
+echo "theta 60 to 40" >> $log_file
 
 echo "==========================" >> $log_file
 # YAML 파일별 실행
