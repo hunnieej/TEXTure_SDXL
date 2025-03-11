@@ -56,12 +56,6 @@ from PIL import Image
 # SDv2는 512 image -> 64 latent (64 pixel per latent)
 ######################################################################
 
-# [250302_SDXLv1]
-# ❗Todo❗ 해상도 부분에서 문제가 있는 것으로 파악, 코드 파악하고 의논해보기
-# ❗Todo❗ : SDXL은 2개의 tokenizer, 2개의 text encoder 차원 통일 방법에서 하자 없는지 파악
-
-######################################################################
-
 class SDXL(nn.Module):
     def __init__(self, device, model_name="stabilityai/stable-diffusion-xl-base-1.0", concept_name=None, concept_path=None,
                  latent_mode=True, min_timestep=0.02, max_timestep=0.98, no_noise=False,
@@ -119,19 +113,6 @@ class SDXL(nn.Module):
         self.base_vae = AutoencoderKL.from_pretrained(base_model, subfolder='vae', use_auth_token=self.token).to(self.device)
         if self.use_inpaint:
             self.inpaint_vae = AutoencoderKL.from_pretrained(inpaint_model, subfolder='vae', use_auth_token=self.token).to(self.device)
-        
-        # ControlNet Depth 포함한 전체 Pipeline을 pre-trained에서 불러오는 구조
-        # self.pipe = StableDiffusionXLControlNetPipeline.from_pretrained(
-        #     base_model,
-        #     controlnet=self.controlnet,
-        #     vae=self.base_vae.to(self.device),
-        #     variant="fp16",
-        #     use_safetensors=True,
-        #     torch_dtype=torch.float16,
-        # )
-
-        # with open('pipe.txt' , 'w') as f:
-        #     f.write(str(self.pipe))
 
         # 2. load tokenizers and text encoder
         # NOTE: We need to load two tokenizers and two text encoders for each model
@@ -165,13 +146,7 @@ class SDXL(nn.Module):
                                                                     use_auth_token=self.token).to(self.device)
         
         # 5. Scheduler
-        # NOTE : Scheduler Issue
-        # NOTE : Diffusion Scheduler Lists : https://huggingface.co/docs/diffusers/en/api/schedulers/overview
-        # NOTE : Kerras -> SDXL 기본
-        # NOTE : DPM++Solver의 50단계 이하 timestep에서의 단점과 해결 방안
-        # https://github.com/huggingface/diffusers/pull/5541
-        # Scheme 1 :add use_lu_lambdas ; uniform intervals for log-SNR
-        # SCheme 2 : add use euler_at_final
+        # NOTE : Scheduler가 주는 영향 미미 타 원인 파악(250305)
 
         self.PNDMS_scheduler = PNDMScheduler(beta_start=0.00085, beta_end=0.012, beta_schedule="scaled_linear",
                                        num_train_timesteps=self.num_train_timesteps, steps_offset=1,

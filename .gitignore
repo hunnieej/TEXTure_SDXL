@@ -9,3 +9,4 @@ logs/*
 .idea
 experiments/*
 processings/*
+test.sh

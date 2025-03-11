@@ -21,12 +21,14 @@ yaml_files=(
 
 # 로그 파일 저장 경로
 mkdir -p logs
-log_file="logs/log_sdxl_test_24.txt"
+log_file="logs/log_sdxl_T2.txt"
 echo "Execution Log" > $log_file
 echo "==========================" >> $log_file
-echo "T18" >> $log_file
+echo "T1" >> $log_file
 echo "Scheduler : DPMMultstepscheduler with kerras_sigmas=True" >> $log_file
-echo "theta 60 to 40" >> $log_file
+echo "theta 60 to 55" >> $log_file
+echo "# of view to 4" >> $log_file
+echo "theta threshold to 0.1" >> $log_file
 
 echo "==========================" >> $log_file
 # YAML 파일별 실행

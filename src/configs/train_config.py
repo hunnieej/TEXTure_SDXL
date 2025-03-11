@@ -14,15 +14,15 @@ class RenderConfig:
     # training camera radius range
     radius: float = 1.5
     # Set [0,overhead_range] as the overhead region
-    overhead_range: float = 40
+    overhead_range: float = 50
     # Define the front angle region
     front_range: float = 70
     # The front offset, use to rotate shape from code
     front_offset: float = 0.0
     # Number of views to use
-    n_views: int = 8 # phi 관련
+    n_views: int = 4 # phi 관련
     # Theta value for rendering during training
-    base_theta: float = 40
+    base_theta: float = 55
     # Additional views to use before rotating around shape
     views_before: List[Tuple[float, float]] = field(default_factory=list)
     # Additional views to use after rotating around shape
@@ -73,7 +73,7 @@ class GuideConfig:
     # background_img: str = 'textures/brick_wall.png'
     # background_img: str = None
     # Threshold for defining refine regions # 0.2
-    z_update_thr: float = 0.3
+    z_update_thr: float = 0.1
     # Some more strict masking for projecting back
     strict_projection: bool = True
 
@@ -99,7 +99,7 @@ class LogConfig:
     # Experiment name
     exp_name: str
     # Experiment output dir
-    exp_root: Path = Path('experiments/SDXL_test_24')
+    exp_root: Path = Path('experiments/SDXL_T2')
     # Run only test
     eval_only: bool = False
     # Number of angles to sample for eval during training
