@@ -171,10 +171,6 @@ class SDXL(nn.Module):
         
         self.alphas = self.scheduler.alphas_cumprod.to(self.device)  # for convenience
 
-        # save nn.modul as txt
-        # with open('model.txt', 'w') as f:
-        #     f.write(str(self))
-
         # 6. Load concept -> Not used in this project
         # if concept_name is not None:
         #     self.load_concept(concept_name, concept_path)
@@ -337,10 +333,12 @@ class SDXL(nn.Module):
         inpaint_prompt_embeds = torch.cat([inpaint_negative_prompt_embeds, inpaint_prompt_embeds])  # [2, 77, 2048]
         inpaint_pooled_prompt_embeds = torch.cat([inpaint_negative_pooled_prompt_embeds, inpaint_pooled_prompt_embeds])  # [2, 1280]
 
-        # print('base_prompt_embeds', base_prompt_embeds.shape) # [2 77 2048]
-        # print('base pooled prompt embeds', base_pooled_prompt_embeds.shape) # [2 1280]
-        # print('inpaint prompt embeds', inpaint_prompt_embeds.shape) # [2 77 2048]
-        # print('inpaint pooled prompt embeds', inpaint_pooled_prompt_embeds.shape) # [2 1280]
+        ########################################################
+        # base_prompt_embeds : [2, 77, 2048]
+        # base_pooled_prompt_embeds : [2, 1280]
+        # inpaint_prompt_embeds : [2, 77, 2048]
+        # inpaint_pooled_prompt_embeds : [2, 1280]
+        ########################################################
 
         return (base_prompt_embeds, base_pooled_prompt_embeds), (inpaint_prompt_embeds, inpaint_pooled_prompt_embeds)
     
@@ -349,8 +347,10 @@ class SDXL(nn.Module):
                      fixed_seed=None, check_mask_iters=0.5, intermediate_vis=False):
         intermediate_results = []
 
-        # print(depth_mask.shape) #[1 1 H W]
-        # print(inputs.shape) #[1 3 H W]
+        # depth_mask.shape : [1, 1, H, W]
+        # inputs.shape : [1, 3, H, W]
+
+        # Option 1 : Depth Estimator with MiDAS
         self.image = inputs
         def get_depth_map(image):
             image = self.feature_extractor(images=image, return_tensors="pt").pixel_values.to("cuda")
@@ -372,7 +372,7 @@ class SDXL(nn.Module):
             # image = Image.fromarray((image * 255.0).clip(0, 255).astype(np.uint8))
             controlnet_depth_mask = image
             return controlnet_depth_mask
-
+        
         def sample(latents, depth_mask, cond_depth_mask, strength, num_inference_steps, update_mask=None, check_mask=None,
                    masked_latents=None):
             

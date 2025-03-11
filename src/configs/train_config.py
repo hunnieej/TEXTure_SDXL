@@ -13,16 +13,16 @@ class RenderConfig:
     eval_grid_size: int = 1024
     # training camera radius range
     radius: float = 1.5
-    # Set [0,overhead_range] as the overhead region
-    overhead_range: float = 50
+    # Set [0,overhead_range] as the overhead region # default 70
+    overhead_range: float = 70
     # Define the front angle region
     front_range: float = 70
     # The front offset, use to rotate shape from code
     front_offset: float = 0.0
     # Number of views to use
-    n_views: int = 4 # phi 관련
-    # Theta value for rendering during training
-    base_theta: float = 55
+    n_views: int = 10 # phi
+    # Theta value for rendering during training #default 60
+    base_theta: float = 60
     # Additional views to use before rotating around shape
     views_before: List[Tuple[float, float]] = field(default_factory=list)
     # Additional views to use after rotating around shape
@@ -99,7 +99,7 @@ class LogConfig:
     # Experiment name
     exp_name: str
     # Experiment output dir
-    exp_root: Path = Path('experiments/SDXL_T2')
+    exp_root: Path = Path('experiments/SDXL_T3')
     # Run only test
     eval_only: bool = False
     # Number of angles to sample for eval during training
