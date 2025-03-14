@@ -20,7 +20,7 @@ class RenderConfig:
     # The front offset, use to rotate shape from code
     front_offset: float = 0.0
     # Number of views to use
-    n_views: int = 10 # phi
+    n_views: int = 8 # phi
     # Theta value for rendering during training #default 60
     base_theta: float = 60
     # Additional views to use before rotating around shape
@@ -73,9 +73,11 @@ class GuideConfig:
     # background_img: str = 'textures/brick_wall.png'
     # background_img: str = None
     # Threshold for defining refine regions # 0.2
-    z_update_thr: float = 0.1
+    z_update_thr: float = 0.2
     # Some more strict masking for projecting back
     strict_projection: bool = True
+    #grid trainer mode
+    grid_train: bool = True
 
 
 @dataclass
@@ -99,7 +101,7 @@ class LogConfig:
     # Experiment name
     exp_name: str
     # Experiment output dir
-    exp_root: Path = Path('experiments/SDXL_T3')
+    exp_root: Path = Path('experiments/SDXL_4G_T29')
     # Run only test
     eval_only: bool = False
     # Number of angles to sample for eval during training

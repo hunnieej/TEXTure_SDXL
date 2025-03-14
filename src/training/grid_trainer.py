@@ -18,13 +18,19 @@ from tqdm import tqdm
 from src import utils
 from src.configs.train_config import TrainConfig
 from src.models.textured_mesh import TexturedMeshModel
-from src.stable_diffusion_depth import StableDiffusion
+from src.stable_diffusion_depth import StableDiffusion #Base TEXTure
+from src.stable_diffusion_depth_sdxl_inpaint import StableDiffusion_inpaintXL #SDv2_Depth + SDXL inpaint 1.0
+from src.sdxl_depth import SDXL #SDXL base 1.0 + SDXL inpaint 1.0
 from src.training.views_dataset import ViewsDataset, MultiviewDataset
 from src.utils import make_path, tensor2numpy
 
+import time # texture generation time calculation
+import os
+from pathlib import Path
+
 import torchvision.utils as vutils
 
-class TEXTure:
+class TEXTureGrid:
     def __init__(self, cfg: TrainConfig):
         self.cfg = cfg
         self.paint_step = 0
@@ -73,14 +79,36 @@ class TEXTure:
         return model
 
     def init_diffusion(self) -> Any:
-        diffusion_model = StableDiffusion(self.device, model_name=self.cfg.guide.diffusion_name,
+        # diffusion model로 stable_diffusion_depth.py의 StableDiffusion 클래스 사용
+        # Original Code : Stable Diffusion v2
+        # diffusion_model = StableDiffusion(self.device, model_name=self.cfg.guide.diffusion_name,
+        #                                   concept_name=self.cfg.guide.concept_name,
+        #                                   concept_path=self.cfg.guide.concept_path,
+        #                                   latent_mode=False,
+        #                                   min_timestep=self.cfg.optim.min_timestep,
+        #                                   max_timestep=self.cfg.optim.max_timestep,
+        #                                   no_noise=self.cfg.optim.no_noise,
+        #                                   use_inpaint=True)
+        
+        # New model : SDv2_depth + SDXL inpaint 1.0
+        # diffusion_model = StableDiffusion_inpaintXL(self.device, model_name=self.cfg.guide.diffusion_name,
+        #                                   concept_name=self.cfg.guide.concept_name,
+        #                                   concept_path=self.cfg.guide.concept_path,
+        #                                   latent_mode=False,
+        #                                   min_timestep=self.cfg.optim.min_timestep,
+        #                                   max_timestep=self.cfg.optim.max_timestep,
+        #                                   no_noise=self.cfg.optim.no_noise,
+        #                                   use_inpaint=True)
+        
+        # New model : SDXL base 1.0
+        diffusion_model = SDXL(self.device, model_name=self.cfg.guide.diffusion_name,
                                           concept_name=self.cfg.guide.concept_name,
                                           concept_path=self.cfg.guide.concept_path,
                                           latent_mode=False,
                                           min_timestep=self.cfg.optim.min_timestep,
                                           max_timestep=self.cfg.optim.max_timestep,
                                           no_noise=self.cfg.optim.no_noise,
-                                          use_inpaint=True)
+                                          use_inpaint=True, use_autodepth=False)
 
         for p in diffusion_model.parameters():
             p.requires_grad = False
@@ -294,7 +322,9 @@ class TEXTure:
         if self.paint_step > 1 or self.cfg.guide.initial_texture is not None:
             checker_mask = self.generate_checkerboard(crop(update_mask), crop(refine_mask),
                                                       crop(generate_mask))
-            self.log_train_image(F.interpolate(cropped_rgb_render, (512, 512)) * (1 - checker_mask),
+            # self.log_train_image(F.interpolate(cropped_rgb_render, (512, 512)) * (1 - checker_mask),
+            #                      'checkerboard_input')
+            self.log_train_image(F.interpolate(cropped_rgb_render, (1024, 1024)) * (1 - checker_mask),
                                  'checkerboard_input')
         self.diffusion.use_inpaint = self.cfg.guide.use_inpainting and self.paint_step > 1
 
@@ -331,7 +361,8 @@ class TEXTure:
     def paint_viewpoint_initial(self, data: Dict[str, Any]):
         logger.info(f'--- Painting step #{self.paint_step} ---')
         theta, phi, radius = data['theta'], data['phi'], data['radius']
-        phi_angles = [0, np.pi/2, np.pi, 3*np.pi/2]
+        # phi_angles = [np.pi/4, np.pi*3/4, np.pi*5/4, np.pi*7/4]
+        phi_angles = [np.pi, np.pi/2, 3*np.pi/2, 0]
         cropped_renders = []
         cropped_depths = []
         cropped_masks = []
@@ -465,9 +496,12 @@ class TEXTure:
         ], dim=2)
 
         # Resize the concatenated image to the required size for the diffusion process
-        cropped_rgb_render_2x2 = F.interpolate(cropped_rgb_render_2x2, (512, 512), mode='bilinear', align_corners=False)
-        cropped_depth_render_2x2 = F.interpolate(cropped_depth_render_2x2, (512, 512), mode='bilinear', align_corners=False)
-        cropped_update_mask_2x2 = F.interpolate(cropped_update_mask_2x2, (512, 512), mode='bilinear', align_corners=False)
+        cropped_rgb_render_2x2 = F.interpolate(cropped_rgb_render_2x2, (1024, 1024), mode='bilinear', align_corners=False)
+        cropped_depth_render_2x2 = F.interpolate(cropped_depth_render_2x2, (1024, 1024), mode='bilinear', align_corners=False)
+        cropped_update_mask_2x2 = F.interpolate(cropped_update_mask_2x2, (1024, 1024), mode='bilinear', align_corners=False)
+        # cropped_rgb_render_2x2 = F.interpolate(cropped_rgb_render_2x2, (512, 512), mode='bilinear', align_corners=False)
+        # cropped_depth_render_2x2 = F.interpolate(cropped_depth_render_2x2, (512, 512), mode='bilinear', align_corners=False)
+        # cropped_update_mask_2x2 = F.interpolate(cropped_update_mask_2x2, (512, 512), mode='bilinear', align_corners=False)
 
         self.save_vu_image(cropped_depth_render_2x2, 'cropped_depth_render_2x2')
         self.save_vu_image(cropped_rgb_render_2x2, 'cropped_rgb_render_2x2')
@@ -477,8 +511,10 @@ class TEXTure:
         if self.paint_step > 1 or self.cfg.guide.initial_texture is not None:
             checker_mask = self.generate_checkerboard(cropped_update_mask_2x2, cropped_update_mask_2x2,
                                                     cropped_update_mask_2x2)
-            self.log_train_image(F.interpolate(cropped_rgb_render_2x2, (512, 512)) * (1 - checker_mask),
+            self.log_train_image(F.interpolate(cropped_rgb_render_2x2, (1024, 1024)) * (1 - checker_mask),
                                 'checkerboard_input')
+            # self.log_train_image(F.interpolate(cropped_rgb_render_2x2, (512, 512)) * (1 - checker_mask),
+            #                     'checkerboard_input')
         self.diffusion.use_inpaint = self.cfg.guide.use_inpainting and self.paint_step > 1
 
         # Diffusion Process with 2x2 grid
@@ -496,11 +532,11 @@ class TEXTure:
         self.log_diffusion_steps(steps_vis)
 
         # Split the 2x2 grid into four separate images
-        split_images = torch.split(cropped_rgb_output, 256, dim=2)
-        top_left = torch.split(split_images[0], 256, dim=3)[0]
-        top_right = torch.split(split_images[0], 256, dim=3)[1]
-        bottom_left = torch.split(split_images[1], 256, dim=3)[0]
-        bottom_right = torch.split(split_images[1], 256, dim=3)[1]
+        split_images = torch.split(cropped_rgb_output, 512, dim=2)
+        top_left = torch.split(split_images[0], 512, dim=3)[0]
+        top_right = torch.split(split_images[0], 512, dim=3)[1]
+        bottom_left = torch.split(split_images[1], 512, dim=3)[0]
+        bottom_right = torch.split(split_images[1], 512, dim=3)[1]
 
         # Resize each image to match the size of the corresponding cropped render
         resized_top_left = F.interpolate(top_left, size=(cropped_renders[0].shape[2], cropped_renders[0].shape[3]), mode='bilinear', align_corners=False)
@@ -573,30 +609,38 @@ class TEXTure:
 
         update_mask = generate_mask.clone()
 
+        # Object Mask : Delete background
+
         object_mask = torch.ones_like(update_mask)
         object_mask[depth_render == 0] = 0
+        # Object Mask Edge Erosion
         object_mask = torch.from_numpy(
             cv2.erode(object_mask[0, 0].detach().cpu().numpy(), np.ones((7, 7), np.uint8))).to(
             object_mask.device).unsqueeze(0).unsqueeze(0)
 
         # Generate the refine mask based on the z normals, and the edited mask
-
+        # z_update_thr에 따라서 z_normal과 z_normal_cache를 비교 연산
         refine_mask = torch.zeros_like(update_mask)
+        # NOTE : Option 1 , z_update_thr 낮추기
         refine_mask[z_normals > z_normals_cache[:, :1, :, :] + self.cfg.guide.z_update_thr] = 1
+        # refine_mask[z_normals > z_normals_cache[:, :1, :, :] - self.cfg.guide.z_update_thr] = 1
         if self.cfg.guide.initial_texture is None:
             refine_mask[z_normals_cache[:, :1, :, :] == 0] = 0
         elif self.cfg.guide.reference_texture is not None:
             refine_mask[edited_mask == 0] = 0
+            # NOTE : Option 2 Dilate Kerner size expand
             refine_mask = torch.from_numpy(
                 cv2.dilate(refine_mask[0, 0].detach().cpu().numpy(), np.ones((31, 31), np.uint8))).to(
                 mask.device).unsqueeze(0).unsqueeze(0)
             refine_mask[mask == 0] = 0
             # Don't use bad angles here
             refine_mask[z_normals < 0.4] = 0
+            # refine_mask[z_normals < 0.2] = 0
         else:
-            # Update all regions inside the object
+            # Update all regions inside the object 
             refine_mask[mask == 0] = 0
 
+        # NOTE : Option 3, erode 부분 줄이기
         refine_mask = torch.from_numpy(
             cv2.erode(refine_mask[0, 0].detach().cpu().numpy(), np.ones((5, 5), np.uint8))).to(
             mask.device).unsqueeze(0).unsqueeze(0)
@@ -633,15 +677,21 @@ class TEXTure:
         return update_mask, generate_mask, refine_mask
 
     def generate_checkerboard(self, update_mask_inner, improve_z_mask_inner, update_mask_base_inner):
-        checkerboard = torch.ones((1, 1, 64 // 2, 64 // 2)).to(self.device)
+        checkerboard = torch.ones((1, 1, 128 // 2, 128 // 2)).to(self.device)
         # Create a checkerboard grid
         checkerboard[:, :, ::2, ::2] = 0
         checkerboard[:, :, 1::2, 1::2] = 0
+        # checkerboard = F.interpolate(checkerboard,
+        #                              (512, 512))
+        # checker_mask = F.interpolate(update_mask_inner, (512, 512))
+        # only_old_mask = F.interpolate(torch.bitwise_and(improve_z_mask_inner == 1,
+        #                                                 update_mask_base_inner == 0).float(), (512, 512))
+
         checkerboard = F.interpolate(checkerboard,
-                                     (512, 512))
-        checker_mask = F.interpolate(update_mask_inner, (512, 512))
+                                     (1024, 1024))
+        checker_mask = F.interpolate(update_mask_inner, (1024, 1024))
         only_old_mask = F.interpolate(torch.bitwise_and(improve_z_mask_inner == 1,
-                                                        update_mask_base_inner == 0).float(), (512, 512))
+                                                        update_mask_base_inner == 0).float(), (1024, 1024))
         checker_mask[only_old_mask == 1] = checkerboard[only_old_mask == 1]
         return checker_mask
 
@@ -787,7 +837,8 @@ class TEXTure:
             else:
                 tensor = einops.rearrange(tensor, '(1) c h w -> h w c').detach().cpu().numpy()
             Image.fromarray((tensor * 255).astype(np.uint8)).save(
-                self.train_renders_path / f'{self.ncount:04d}_{self.paint_step:02d}_{name}.jpg')
+                self.train_renders_path / f'{self.paint_step:04d}_{name}.jpg')
+                # self.train_renders_path / f'{self.ncount:04d}_{self.paint_step:02d}_{name}.jpg')
 
     def log_diffusion_steps(self, intermediate_vis: List[Image.Image]):
         if len(intermediate_vis) > 0:

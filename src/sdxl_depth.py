@@ -499,6 +499,7 @@ class SDXL(nn.Module):
                             controlnet_latent = self.controlnet(
                                 latent_model_input,  # 현재 Latent 입력
                                 t,  # 현재 timestep
+                                controlnet_conditioning_scale=0.5,
                                 encoder_hidden_states=base_prompt_embeds,  # Text Condition
                                 controlnet_cond=cond_depth_mask,  # ControlNet에 Depth 정보를 입력
                                 added_cond_kwargs=base_added_cond_kwargs,
@@ -510,7 +511,7 @@ class SDXL(nn.Module):
                             # Blurry output의 원인으로는 ControlNet의 Feature mismatch
 
 
-                            # controlnet_output = controlnet_latent['sample'] # [2, 320, 128, 128]
+                            controlnet_output = controlnet_latent['sample'] # [2, 320, 128, 128]
                             controlnet_down_features = controlnet_latent['down_block_res_samples']
                             controlnet_mid_features = controlnet_latent['mid_block_res_sample'] #[2, 1280, 32, 32]
                             
