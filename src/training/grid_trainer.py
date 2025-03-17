@@ -677,7 +677,7 @@ class TEXTureGrid:
         return update_mask, generate_mask, refine_mask
 
     def generate_checkerboard(self, update_mask_inner, improve_z_mask_inner, update_mask_base_inner):
-        checkerboard = torch.ones((1, 1, 128 // 2, 128 // 2)).to(self.device)
+        checkerboard = torch.ones((1, 1, 32 // 2, 32 // 2)).to(self.device)
         # Create a checkerboard grid
         checkerboard[:, :, ::2, ::2] = 0
         checkerboard[:, :, 1::2, 1::2] = 0
