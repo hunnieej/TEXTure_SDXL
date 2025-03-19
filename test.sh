@@ -2,41 +2,137 @@
 
 # YAML 파일 경로 리스트
 yaml_files=(
-    # "configs/text_guided_split/alien_1.yaml"
-    # "configs/text_guided_split/alien_2.yaml"
-    # "configs/text_guided_split/alien_3.yaml"
-    # "configs/text_guided_split/alien_4.yaml"
-    # "configs/text_guided_split/alien_5.yaml"
-    # "configs/text_guided_split/rabbit_1.yaml"
+    "configs/text_guided_split/alien_1.yaml"
+    "configs/text_guided_split/alien_2.yaml"
+    "configs/text_guided_split/alien_3.yaml"
+    "configs/text_guided_split/alien_4.yaml"
+    "configs/text_guided_split/alien_5.yaml"
+    # "configs/text_guided_split/apple_1.yaml"
+    # "configs/text_guided_split/apple_2.yaml"
+    # "configs/text_guided_split/apple_3.yaml"
+    # "configs/text_guided_split/apple_4.yaml"
+    # "configs/text_guided_split/apple_5.yaml"
+    # "configs/text_guided_split/basketball_1.yaml"
+    # "configs/text_guided_split/basketball_2.yaml"
+    # "configs/text_guided_split/basketball_3.yaml"
+    # "configs/text_guided_split/basketball_4.yaml"
+    # "configs/text_guided_split/basketball_5.yaml"
+    # "configs/text_guided_split/bunny_1.yaml"
+    # "configs/text_guided_split/bunny_2.yaml"
+    # "configs/text_guided_split/bunny_3.yaml"
+    # "configs/text_guided_split/bunny_4.yaml"
+    # "configs/text_guided_split/bunny_5.yaml"
+    # "configs/text_guided_split/candle_1.yaml"
+    # "configs/text_guided_split/candle_2.yaml"
+    # "configs/text_guided_split/candle_3.yaml"
+    # "configs/text_guided_split/candle_4.yaml"
+    # "configs/text_guided_split/candle_5.yaml"
+    "configs/text_guided_split/cat_1.yaml"
+    "configs/text_guided_split/cat_2.yaml"
+    "configs/text_guided_split/cat_3.yaml"
+    "configs/text_guided_split/cat_4.yaml"
+    "configs/text_guided_split/cat_5.yaml"
+    # "configs/text_guided_split/cow_1.yaml"
+    # "configs/text_guided_split/cow_2.yaml"
+    # "configs/text_guided_split/cow_3.yaml"
+    # "configs/text_guided_split/cow_4.yaml"
+    # "configs/text_guided_split/cow_5.yaml"
+    # "configs/text_guided_split/doughnut_1.yaml"
+    # "configs/text_guided_split/doughnut_2.yaml"
+    # "configs/text_guided_split/doughnut_3.yaml"
+    # "configs/text_guided_split/doughnut_4.yaml"
+    # "configs/text_guided_split/doughnut_5.yaml"
+    # "configs/text_guided_split/fish_1.yaml"
+    # "configs/text_guided_split/fish_2.yaml"
+    # "configs/text_guided_split/fish_3.yaml"
+    # "configs/text_guided_split/fish_4.yaml"
+    # "configs/text_guided_split/fish_5.yaml"
+    # "configs/text_guided_split/horse_1.yaml"
+    # "configs/text_guided_split/horse_2.yaml"
+    # "configs/text_guided_split/horse_3.yaml"
+    # "configs/text_guided_split/horse_4.yaml"
+    # "configs/text_guided_split/horse_5.yaml"
+    # "configs/text_guided_split/lamp_1.yaml"
+    # "configs/text_guided_split/lamp_2.yaml"
+    # "configs/text_guided_split/lamp_3.yaml"
+    # "configs/text_guided_split/lamp_4.yaml"
+    # "configs/text_guided_split/lamp_5.yaml"
+    # "configs/text_guided_split/monkey_1.yaml"
+    # "configs/text_guided_split/monkey_2.yaml"
+    # "configs/text_guided_split/monkey_3.yaml"
+    # "configs/text_guided_split/monkey_4.yaml"
+    # "configs/text_guided_split/monkey_5.yaml"
+    # "configs/text_guided_split/napoleon_1.yaml"
+    # "configs/text_guided_split/napoleon_2.yaml"
+    # "configs/text_guided_split/napoleon_3.yaml"
+    # "configs/text_guided_split/napoleon_4.yaml"
+    # "configs/text_guided_split/napoleon_5.yaml"
+    # "configs/text_guided_split/nascar_1.yaml"
+    # "configs/text_guided_split/nascar_2.yaml"
+    # "configs/text_guided_split/nascar_3.yaml"
+    # "configs/text_guided_split/nascar_4.yaml"
+    # "configs/text_guided_split/nascar_5.yaml"
+    # "configs/text_guided_split/person_1.yaml"
+    # "configs/text_guided_split/person_2.yaml"
+    # "configs/text_guided_split/person_3.yaml"
+    # "configs/text_guided_split/person_4.yaml"
+    # "configs/text_guided_split/person_5.yaml"
+    # "configs/text_guided_split/pot_1.yaml"
+    # "configs/text_guided_split/pot_2.yaml"
+    # "configs/text_guided_split/pot_3.yaml"
+    # "configs/text_guided_split/pot_4.yaml"
+    # "configs/text_guided_split/pot_5.yaml"
+    "configs/text_guided_split/rabbit_1.yaml"
     "configs/text_guided_split/rabbit_2.yaml"
-    # "configs/text_guided_split/rabbit_3.yaml"
-    # "configs/text_guided_split/rabbit_4.yaml"
-    # "configs/text_guided_split/rabbit_5.yaml" 
-    # "configs/text_guided_split/cat_1.yaml"
-    # "configs/text_guided_split/cat_2.yaml"
-    # "configs/text_guided_split/cat_3.yaml"
-    # "configs/text_guided_split/cat_4.yaml"
-    # "configs/text_guided_split/cat_5.yaml"
+    "configs/text_guided_split/rabbit_3.yaml"
+    "configs/text_guided_split/rabbit_4.yaml"
+    "configs/text_guided_split/rabbit_5.yaml"
+    # "configs/text_guided_split/shoe_1.yaml"
+    # "configs/text_guided_split/shoe_2.yaml"
+    # "configs/text_guided_split/shoe_3.yaml"
+    # "configs/text_guided_split/shoe_4.yaml"
+    # "configs/text_guided_split/shoe_5.yaml"
+    # "configs/text_guided_split/sphere_1.yaml"
+    # "configs/text_guided_split/sphere_2.yaml"
+    # "configs/text_guided_split/sphere_3.yaml"
+    # "configs/text_guided_split/sphere_4.yaml"
+    # "configs/text_guided_split/sphere_5.yaml"
+    # "configs/text_guided_split/strawberry_1.yaml"
+    # "configs/text_guided_split/strawberry_2.yaml"
+    # "configs/text_guided_split/strawberry_3.yaml"
+    # "configs/text_guided_split/strawberry_4.yaml"
+    # "configs/text_guided_split/strawberry_5.yaml"
+    # "configs/text_guided_split/turtle_1.yaml"
+    # "configs/text_guided_split/turtle_2.yaml"
+    # "configs/text_guided_split/turtle_3.yaml"
+    # "configs/text_guided_split/turtle_4.yaml"
+    # "configs/text_guided_split/turtle_5.yaml"
+    # "configs/text_guided_split/vase_1.yaml"
+    # "configs/text_guided_split/vase_2.yaml"
+    # "configs/text_guided_split/vase_3.yaml"
+    # "configs/text_guided_split/vase_4.yaml"
+    # "configs/text_guided_split/vase_5.yaml"
 )
 
 # 로그 파일 저장 경로
 mkdir -p logs
-log_file="logs/log_T29.txt"
+log_file="logs/log_T37.txt"
 echo "Execution Log" > $log_file
 echo "==========================" >> $log_file
 echo "=========================================" >> $log_file
-echo "|         Parameter Change Log          |" >> $log_file
+echo "|         Parameter Change Log         |" >> $log_file
 echo "=========================================" >> $log_file
-echo "| Parameter         | Default | Set     |" >> $log_file
-echo "|-------------------|---------|---------|" >> $log_file
-echo "| Gaussian Blur K  | 21      | 9       |" >> $log_file
-echo "| Gaussian Blur S  | 16      | 3       |" >> $log_file
-echo "| Erode Kernel     | 5       | 11      |" >> $log_file
-echo "| Dilate Kernel    | 25      | 9       |" >> $log_file
-echo "| z_update_thr     | 0.2     | -0.1    |" >> $log_file
-echo "| n_views          | 8       | 8       |" >> $log_file
+echo "| Parameter        | Default | Set     |" >> $log_file
+echo "|------------------|---------|---------|" >> $log_file
+echo "| Gaussian Blur K  | 21      | 21      |" >> $log_file
+echo "| Gaussian Blur S  | 16      | 16      |" >> $log_file
+echo "| Erode Kernel     | 5       | 5       |" >> $log_file
+echo "| Dilate Kernel    | 25      | 25      |" >> $log_file
+echo "| z_update_thr     | 0.2     | -0.15   |" >> $log_file
+echo "| n_views          | 8       | 9       |" >> $log_file
+echo "| ControlNet Scale | 1.0     | 0.75    |" >> $log_file
 echo "=========================================" >> $log_file
-echo "| Grid batch order set                  |" >> $log_file
+echo "| Grid batch order set                 |" >> $log_file
 echo "=========================================" >> $log_file
 
 

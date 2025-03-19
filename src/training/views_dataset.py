@@ -93,16 +93,22 @@ class MultiviewDataset:
         self.type = type  # train, val, tests
         size = self.cfg.n_views
 
+        # self.phis = [(index / size) * 360 for index in range(size)]
         self.phis = [(index / size) * 360 for index in range(size)]
         self.thetas = [self.cfg.base_theta for _ in range(size)]
 
         # Alternate lists
+        # 각도 리스트가 교차로 나오는 이유
         alternate_lists = lambda l: [l[0]] + [i for j in zip(l[1:size // 2], l[-1:size // 2:-1]) for i in j] + [
             l[size // 2]]
         if self.cfg.alternate_views:
             self.phis = alternate_lists(self.phis)
+            # NOTE : 마지막에 얼굴 한번 더 칠하자
+            self.phis.append(0)
             self.thetas = alternate_lists(self.thetas)
+            self.thetas.append(self.thetas[0])
         logger.info(f'phis: {self.phis}')
+        logger.info(f'thetas:{self.thetas}')
         # self.phis = self.phis[1:2]
         # self.thetas = self.thetas[1:2]
         # if append_upper:

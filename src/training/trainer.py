@@ -331,17 +331,10 @@ class TEXTure:
         crop = lambda x: x[:, :, min_h:max_h, min_w:max_w]
         # rgb render : diffusion input 1
         cropped_rgb_render = crop(rgb_render) # [1, 3, H, W]
-        # print(rgb_render.shape)
-        # print(cropped_rgb_render.shape)
-        # depth render : diffusion input 2
         cropped_depth_render = crop(depth_render)
 
         cropped_update_mask = crop(update_mask)
-        # print('depth_input', cropped_depth_render.shape) # [1, 1, H, W]
-        # print(cropped_rgb_render.shape)
-        # print(cropped_depth_render.shape)
         self.log_train_image(cropped_rgb_render, name='cropped_input')
-        # self.log_train_image(cropped_depth_render, name='cropped_depth')
 
         checker_mask = None
         if self.paint_step > 1 or self.cfg.guide.initial_texture is not None:

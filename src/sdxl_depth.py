@@ -569,7 +569,8 @@ class SDXL(nn.Module):
                             vis_latents = 1 / 0.13025 * vis_latents
                             image = self.inpaint_vae.decode(vis_latents).sample
                         else: 
-                            vis_latents = 1 / 0.18215 * vis_latents
+                            vis_latents = 1 / 0.13025 * vis_latents
+                            # vis_latents = 1 / 0.18215 * vis_latents
                             image = self.base_vae.decode(vis_latents).sample
                         image = (image / 2 + 0.5).clamp(0, 1)
                         image = image.cpu().permute(0, 2, 3, 1).numpy()
