@@ -20,13 +20,14 @@ class RenderConfig:
     # The front offset, use to rotate shape from code
     front_offset: float = 0.0
     # Number of views to use
-    n_views: int = 8 # phi
+    n_views: int = 4 # phi
     # Theta value for rendering during training #default 60
     base_theta: float = 60
     # Additional views to use before rotating around shape
     views_before: List[Tuple[float, float]] = field(default_factory=list)
     # Additional views to use after rotating around shape
-    views_after: List[Tuple[float, float]] = field(default_factory=[[180, 30], [180, 150]].copy)
+    # views_after: List[Tuple[float, float]] = field(default_factory=[[180, 30], [180, 150]].copy)
+    views_after: List[Tuple[float, float]] = field(default_factory=[[180, 150]].copy)
     # Whether to alternate between the rotating views from the different sides
     alternate_views: bool = True
 
@@ -53,7 +54,7 @@ class GuideConfig:
     # height of mesh
     dy: float = 0.25
     # texture image resolution
-    texture_resolution: int = 1024
+    texture_resolution: int = 512
     # texture mapping interpolation mode from texture image, options: 'nearest', 'bilinear', 'bicubic'
     texture_interpolation_mode: str = 'bilinear'
     # Guidance scale for score distillation
@@ -73,11 +74,13 @@ class GuideConfig:
     # background_img: str = 'textures/brick_wall.png'
     # background_img: str = None
     # Threshold for defining refine regions # 0.2
-    z_update_thr: float = 0.15
+    z_update_thr: float = 0.1
     # Some more strict masking for projecting back
     strict_projection: bool = True
     #grid trainer mode
     grid_train: bool = True
+    # diffusion model
+    base_train: bool = False
 
 
 @dataclass
@@ -101,7 +104,7 @@ class LogConfig:
     # Experiment name
     exp_name: str
     # Experiment output dir
-    exp_root: Path = Path('experiments/SDXL_4G_T37')
+    exp_root: Path = Path('experiments/SDXL_4G_T86')
     # Run only test
     eval_only: bool = False
     # Number of angles to sample for eval during training

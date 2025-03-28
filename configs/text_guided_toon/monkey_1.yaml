@@ -1,8 +1,0 @@
-log:
-  exp_name: monkey_t1
-guide:
-  text: A monkey with cartoon-style realistic fur texture featuring brown and golden highlights, {} view
-  append_direction: true
-  shape_path: shapes/monkey.obj
-optim:
-  seed: 3

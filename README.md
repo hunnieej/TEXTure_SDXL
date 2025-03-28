@@ -1,7 +1,8 @@
 # TEXTure: Text-Guided Texturing of 3D Shapes
 ## Description
 - Implementation of TEXTurePaper(SIGGRAPH, 2023) with SDXL models </br>
-- All copyrights belong to original developer
+- All copyrights belong to original developer </br>
+- 2x2 grid based texture generation released (250319) </br>
 ## Log
 \[250307\] Clone to repository, only texture mapping available (Texture editing and Transfer doesn't covered) </br>
 

@@ -52,8 +52,7 @@ import cv2
 from PIL import Image
 
 ######################################################################
-# NOTE : SDXL은 1,024 image -> 128 latent (64 pixel per latent)
-# SDv2는 512 image -> 64 latent (64 pixel per latent)
+# NOTE : SDXL 1,024 image -> 128 latent (64 pixel per latent)
 ######################################################################
 
 class SDXL(nn.Module):
@@ -88,18 +87,6 @@ class SDXL(nn.Module):
         logger.info(f'loading model {inpaint_model}...')
 
         # 0. ControlNet Depth
-        '''
-            variant (`str`, *optional*):
-                Load weights from a specified `variant` filename such as `"fp16"` or `"ema"`. This is ignored when
-                loading `from_flax`.
-            use_safetensors (`bool`, *optional*, defaults to `None`):
-                If set to `None`, the `safetensors` weights are downloaded if they're available **and** if the
-                `safetensors` library is installed. If set to `True`, the model is forcibly loaded from `safetensors`
-                weights. If set to `False`, `safetensors` weights are not loaded.
-            torch_dtype (`str` or `torch.dtype`, *optional*):
-                Override the default `torch.dtype` and load the model with another dtype. If `"auto"` is passed, the
-                dtype is automatically derived from the model's weights.
-        '''
         self.depth_estimator = DPTForDepthEstimation.from_pretrained("Intel/dpt-hybrid-midas").to("cuda")
         self.feature_extractor = DPTFeatureExtractor.from_pretrained("Intel/dpt-hybrid-midas")
         self.controlnet = ControlNetModel.from_pretrained(
@@ -145,8 +132,6 @@ class SDXL(nn.Module):
             self.inpaint_unet = UNet2DConditionModel.from_pretrained(inpaint_model, subfolder='unet', 
                                                                     use_auth_token=self.token).to(self.device)
         
-        # 5. Scheduler
-        # NOTE : Scheduler가 주는 영향 미미 타 원인 파악(250305)
 
         self.PNDMS_scheduler = PNDMScheduler(beta_start=0.00085, beta_end=0.012, beta_schedule="scaled_linear",
                                        num_train_timesteps=self.num_train_timesteps, steps_offset=1,
@@ -161,11 +146,6 @@ class SDXL(nn.Module):
                                         num_train_timesteps=self.num_train_timesteps, steps_offset=1, 
                                         use_karras_sigmas=True)
         
-        # NOTE : Diffusers version update required, Version mismatch for diffusers 0.21.3
-        # self.DPMSolver_scheduler = DPMSolverMultistepScheduler(beta_start=0.00085, beta_end=0.012, beta_schedule="scaled_linear",
-        #                                 num_train_timesteps=self.num_train_timesteps, steps_offset=1, 
-        #                                 use_karras_sigmas=True, sde_type="sde-dpmsolver++",
-        #                                 euler_at_final=True, use_lu_lambdas=True)
         
         self.scheduler = self.DPMSolver_scheduler
         
@@ -222,8 +202,10 @@ class SDXL(nn.Module):
         base_text_encoders = [self.base_text_encoder_1, self.base_text_encoder_2]
         base_tokenizers = [self.base_tokenizer_1, self.base_tokenizer_2]
         prompt_embeds_list = []
+        print(len(prompt))
+        # NOTE : https://github.com/mikhail-bot/stable-diffusion-negative-prompts
         if negative_prompt is None:
-            negative_prompt = [''] * len(prompt)
+            negative_prompt = ['blurry, low contrast, low resolution, deformed, poorly drawn, mutation, distorted, low quality'] * len(prompt)
 
         for tokenizer, text_encoder in zip(base_tokenizers, base_text_encoders):
             with torch.no_grad():
@@ -330,9 +312,12 @@ class SDXL(nn.Module):
             inpaint_negative_prompt_embeds = torch.cat(negative_prompt_embeds_list, dim=-1)  # [1, 77, 2048]
             inpaint_negative_pooled_prompt_embeds = negative_pooled_prompt_embeds.view(bs_embed, -1)  # [1, 1280]
 
-        inpaint_prompt_embeds = torch.cat([inpaint_negative_prompt_embeds, inpaint_prompt_embeds])  # [2, 77, 2048]
-        inpaint_pooled_prompt_embeds = torch.cat([inpaint_negative_pooled_prompt_embeds, inpaint_pooled_prompt_embeds])  # [2, 1280]
-
+            inpaint_prompt_embeds = torch.cat([inpaint_negative_prompt_embeds, inpaint_prompt_embeds])  # [2, 77, 2048]
+            inpaint_pooled_prompt_embeds = torch.cat([inpaint_negative_pooled_prompt_embeds, inpaint_pooled_prompt_embeds])  # [2, 1280]
+            
+        else:
+            inpaint_prompt_embeds = None
+            inpaint_pooled_prompt_embeds = None
         ########################################################
         # base_prompt_embeds : [2, 77, 2048]
         # base_pooled_prompt_embeds : [2, 1280]
@@ -416,9 +401,16 @@ class SDXL(nn.Module):
 
             with torch.autocast('cuda'):
                 for i, t in tqdm(enumerate(timesteps)):
-                    is_inpaint_range = self.use_inpaint and (10 < i < 20)
-                    mask_constraints_iters = True  # i < 20
-                    is_inpaint_iter = is_inpaint_range  # and i %2 == 1
+                    if self.use_inpaint:
+                        is_inpaint_range = self.use_inpaint and (10 < i < 20)
+                        mask_constraints_iters = True  # i < 20
+                        is_inpaint_iter = is_inpaint_range  # and i %2 == 1
+                        # print(mask_constraints_iters)
+                    else :
+                        is_inpaint_range = False
+                        is_inpaint_iter = False
+                        mask_constraints_iters = True
+                        # print(mask_constraints_iters)
 
                     if not is_inpaint_range and mask_constraints_iters:
                         if update_mask is not None:
@@ -427,10 +419,6 @@ class SDXL(nn.Module):
                                 curr_mask = check_mask
                             else:
                                 curr_mask = update_mask
-                            # print("curr_mask", curr_mask.shape) # [1, 1, 128, 128]
-                            # print("update_mask", update_mask.shape) # [1, 1, 128, 128]
-                            # print("latent", latents.shape) #[1, 4, 128, 128]
-                            # print("noised_truth", noised_truth.shape) #[1, 4, 128, 128]
                             latents = latents * curr_mask + noised_truth * (1 - curr_mask)
 
                     # expand the latents if we are doing classifier-free guidance to avoid doing two forward passes.
@@ -441,8 +429,6 @@ class SDXL(nn.Module):
 
                     # SDXL inpaint
                     if is_inpaint_iter:
-                        # print('update_mask', update_mask.shape) # [1, 1, 128, 128]
-                        # print('masked_latents', masked_latents.shape) # [1, 4, 128, 128]
                         latent_mask = torch.cat([update_mask] * 2) # [2, 1, 128, 128]
                         latent_image = torch.cat([masked_latents] * 2) # [2, 4, 128, 128] 
                         latent_model_input_inpaint = torch.cat([latent_model_input, latent_mask, latent_image], dim=1)
@@ -514,7 +500,7 @@ class SDXL(nn.Module):
                             # controlnet_down_features = controlnet_latent['down_block_res_samples']
                             # controlnet_mid_features = controlnet_latent['mid_block_res_sample'] #[2, 1280, 32, 32]
 
-                            controlnet_scale = 0.75  
+                            controlnet_scale = 0.5  
                             controlnet_down_features = [
                                 feature * controlnet_scale for feature in controlnet_latent['down_block_res_samples']
                             ]
@@ -529,14 +515,6 @@ class SDXL(nn.Module):
                             # print('controlnet_features', controlnet_features[5].shape) # [2, 640, 32, 32]
                             # print('controlnet_features', controlnet_features[6].shape) # [2, 1280, 32, 32]
                             # print('controlnet_features', controlnet_features[7].shape) # [2, 1280, 32, 32]
-
-                            # NOTE : down_block_additional_residuals, down_intrablock_additional_residuals
-                            # ❗Todo❗ : 차이 파악
-                            # down_block_additional_residuals — (tuple of torch.Tensor, optional):
-                            # A tuple of tensors that if specified are added to the residuals of down unet blocks.
-
-                            # down_intrablock_additional_residuals (tuple of torch.Tensor, optional)
-                            #  — additional residuals to be added within UNet down blocks, for example from T2I-Adapter side model(s)
                             
                             # mid_block_additional_residual 
                             # — (torch.Tensor, optional): A tensor that if specified is added to the residual of the middle unet block.
@@ -601,19 +579,6 @@ class SDXL(nn.Module):
                 update_mask_1024 = F.interpolate(update_mask, (1024, 1024))
                 masked_inputs = pred_rgb_1024 * (update_mask_1024 < 0.5) + 0.5 * (update_mask_1024 >= 0.5)
                 masked_latents = self.encode_imgs(masked_inputs)
-        # else:
-        #     pred_rgb_512 = F.interpolate(inputs, (512, 512), mode='bilinear',
-        #                                  align_corners=False)
-        #     latents = self.encode_imgs(pred_rgb_512)
-        #     if self.use_inpaint:
-        #         update_mask_512 = F.interpolate(update_mask, (512, 512))
-        #         masked_inputs = pred_rgb_512 * (update_mask_512 < 0.5) + 0.5 * (update_mask_512 >= 0.5)
-        #         masked_latents = self.encode_imgs(masked_inputs)
-
-        # if update_mask is not None:
-        #     update_mask = F.interpolate(update_mask, (64, 64), mode='nearest')
-        # if check_mask is not None:
-        #     check_mask = F.interpolate(check_mask, (64, 64), mode='nearest')
 
         if update_mask is not None:
             update_mask = F.interpolate(update_mask, (128, 128), mode='nearest')
@@ -711,10 +676,7 @@ class SDXL(nn.Module):
             latents = self.encode_imgs(pred_rgb_1024)
             depth_mask = F.interpolate(depth_mask, size=(128, 128), mode='bicubic',
                                        align_corners=False)
-            # pred_rgb_512 = F.interpolate(inputs, (512, 512), mode='bilinear', align_corners=False)
-            # latents = self.encode_imgs(pred_rgb_512)
-            # depth_mask = F.interpolate(depth_mask, size=(64, 64), mode='bicubic',
-            #                            align_corners=False)
+
         else:
             latents = inputs
 

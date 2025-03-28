@@ -1,8 +1,0 @@
-log:
-  exp_name: turtle_t3
-guide:
-  text: A cartoon-style turtle carved from stone with an ancient texture, {} view
-  append_direction: true
-  shape_path: shapes/turtle.obj
-optim:
-  seed: 3

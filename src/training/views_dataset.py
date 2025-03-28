@@ -103,10 +103,8 @@ class MultiviewDataset:
             l[size // 2]]
         if self.cfg.alternate_views:
             self.phis = alternate_lists(self.phis)
-            # NOTE : 마지막에 얼굴 한번 더 칠하자
-            self.phis.append(0)
             self.thetas = alternate_lists(self.thetas)
-            self.thetas.append(self.thetas[0])
+
         logger.info(f'phis: {self.phis}')
         logger.info(f'thetas:{self.thetas}')
         # self.phis = self.phis[1:2]

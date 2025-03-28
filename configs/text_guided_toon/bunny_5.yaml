@@ -1,8 +1,0 @@
-log:
-  exp_name: bunny_t5
-guide:
-  text: A bunny made entirely of cartoon-style metallic gold with a brushed finish, {} view
-  append_direction: true
-  shape_path: shapes/bunny.obj
-optim:
-  seed: 3

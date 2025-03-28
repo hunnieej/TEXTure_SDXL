@@ -1,8 +1,0 @@
-log:
-  exp_name: turtle_t5
-guide:
-  text: A turtle with a cartoon-style golden shell engraved with decorative patterns, {} view
-  append_direction: true
-  shape_path: shapes/turtle.obj
-optim:
-  seed: 3

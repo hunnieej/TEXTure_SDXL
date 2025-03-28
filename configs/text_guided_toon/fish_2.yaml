@@ -1,8 +1,0 @@
-log:
-  exp_name: fish_t2
-guide:
-  text: A fish made of cartoon-style smooth, polished wood with natural grain patterns, {} view
-  append_direction: true
-  shape_path: shapes/fish.obj
-optim:
-  seed: 3

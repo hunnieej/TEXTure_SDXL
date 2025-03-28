@@ -1,8 +1,0 @@
-log:
-  exp_name: monkey_t5
-guide:
-  text: A cartoon-style monkey carved from stone with moss accents, {} view
-  append_direction: true
-  shape_path: shapes/monkey.obj
-optim:
-  seed: 3

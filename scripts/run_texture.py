@@ -2,6 +2,7 @@ import pyrallis
 
 from src.configs.train_config import TrainConfig
 from src.training.trainer import TEXTure
+from src.training.trainerXL import TEXTureXL
 from src.training.grid_trainer import TEXTureGrid
 
 
@@ -10,7 +11,11 @@ def main(cfg: TrainConfig):
     if cfg.guide.grid_train:
         trainer = TEXTureGrid(cfg)
     else :
-        trainer = TEXTure(cfg)
+        if cfg.guide.base_train:
+            trainer = TEXTure(cfg)
+        else:
+            trainer = TEXTureXL(cfg)
+
         
     if cfg.log.eval_only:
         trainer.full_eval()

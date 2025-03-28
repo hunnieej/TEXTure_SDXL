@@ -1,0 +1,8 @@
+log:
+  exp_name: sphere_2
+guide:
+  text: A sphere with a mirror-like surface and high reflectivity, {} view
+  append_direction: true
+  shape_path: shapes/sphere.obj
+optim:
+  seed: 3

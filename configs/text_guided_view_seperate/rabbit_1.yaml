@@ -1,0 +1,8 @@
+log:
+  exp_name: rabbit_1
+guide:
+  text: A rabbit with fluffy fur texture in shades of white and grey, {} view
+  append_direction: true
+  shape_path: shapes/rabbit.obj
+optim:
+  seed: 3

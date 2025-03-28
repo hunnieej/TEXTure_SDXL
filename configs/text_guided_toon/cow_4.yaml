@@ -1,8 +1,0 @@
-log:
-  exp_name: cow_t4
-guide:
-  text: A cow covered in cartoon-style soft, moss-like texture, blending green and brown tones, {} view
-  append_direction: true
-  shape_path: shapes/cow.obj
-optim:
-  seed: 3

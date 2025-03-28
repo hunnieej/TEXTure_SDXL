@@ -1,8 +1,0 @@
-log:
-  exp_name: monkey_t2
-guide:
-  text: A monkey with cartoonish skin and smooth shading, {} view
-  append_direction: true
-  shape_path: shapes/monkey.obj
-optim:
-  seed: 3

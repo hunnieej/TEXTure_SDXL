@@ -79,14 +79,14 @@ class TEXTure:
     def init_diffusion(self) -> Any:
         # diffusion model로 stable_diffusion_depth.py의 StableDiffusion 클래스 사용
         # Original Code : Stable Diffusion v2
-        # diffusion_model = StableDiffusion(self.device, model_name=self.cfg.guide.diffusion_name,
-        #                                   concept_name=self.cfg.guide.concept_name,
-        #                                   concept_path=self.cfg.guide.concept_path,
-        #                                   latent_mode=False,
-        #                                   min_timestep=self.cfg.optim.min_timestep,
-        #                                   max_timestep=self.cfg.optim.max_timestep,
-        #                                   no_noise=self.cfg.optim.no_noise,
-        #                                   use_inpaint=True)
+        diffusion_model = StableDiffusion(self.device, model_name=self.cfg.guide.diffusion_name,
+                                          concept_name=self.cfg.guide.concept_name,
+                                          concept_path=self.cfg.guide.concept_path,
+                                          latent_mode=False,
+                                          min_timestep=self.cfg.optim.min_timestep,
+                                          max_timestep=self.cfg.optim.max_timestep,
+                                          no_noise=self.cfg.optim.no_noise,
+                                          use_inpaint=True)
         
         # New model : SDv2_depth + SDXL inpaint 1.0
         # diffusion_model = StableDiffusion_inpaintXL(self.device, model_name=self.cfg.guide.diffusion_name,
@@ -99,14 +99,14 @@ class TEXTure:
         #                                   use_inpaint=True)
         
         # New model : SDXL base 1.0
-        diffusion_model = SDXL(self.device, model_name=self.cfg.guide.diffusion_name,
-                                          concept_name=self.cfg.guide.concept_name,
-                                          concept_path=self.cfg.guide.concept_path,
-                                          latent_mode=False,
-                                          min_timestep=self.cfg.optim.min_timestep,
-                                          max_timestep=self.cfg.optim.max_timestep,
-                                          no_noise=self.cfg.optim.no_noise,
-                                          use_inpaint=True, use_autodepth=False)
+        # diffusion_model = SDXL(self.device, model_name=self.cfg.guide.diffusion_name,
+        #                                   concept_name=self.cfg.guide.concept_name,
+        #                                   concept_path=self.cfg.guide.concept_path,
+        #                                   latent_mode=False,
+        #                                   min_timestep=self.cfg.optim.min_timestep,
+        #                                   max_timestep=self.cfg.optim.max_timestep,
+        #                                   no_noise=self.cfg.optim.no_noise,
+        #                                   use_inpaint=True, use_autodepth=False)
 
         for p in diffusion_model.parameters():
             p.requires_grad = False
@@ -340,11 +340,9 @@ class TEXTure:
         if self.paint_step > 1 or self.cfg.guide.initial_texture is not None:
             checker_mask = self.generate_checkerboard(crop(update_mask), crop(refine_mask),
                                                       crop(generate_mask))
-            self.log_train_image(F.interpolate(cropped_rgb_render, (1024, 1024)) * (1 - checker_mask),
-                                 'checkerboard_input')
             # NOTE :SDXL 1024x1024로 변경
-            # self.log_train_image(F.interpolate(cropped_rgb_render, (512, 512)) * (1 - checker_mask),
-            #                      'checkerboard_input')
+            self.log_train_image(F.interpolate(cropped_rgb_render, (512, 512)) * (1 - checker_mask),
+                                 'checkerboard_input')
         self.diffusion.use_inpaint = self.cfg.guide.use_inpainting and self.paint_step > 1
 
         cropped_rgb_output, steps_vis = self.diffusion.img2img_step(text_z, cropped_rgb_render.detach(),
@@ -407,13 +405,6 @@ class TEXTure:
         depth_render = outputs['depth'].permute(0, 2, 3, 1).contiguous().detach()
 
         return rgb_render, texture_rgb, depth_render, pred_z_normals
-
-    # NOTE : Kernel Size 조절 필요(250304)
-    # METHOD 1 : 단순 2배 확장
-    # 19 -> 39
-    # 7 -> 15
-    # 31 -> 63
-    # 5 -> 11
 
     def calculate_trimap(self, rgb_render_raw: torch.Tensor,
                          depth_render: torch.Tensor,
@@ -491,22 +482,17 @@ class TEXTure:
 
     # NOTE : Kernel Size 조절 필요(250304)
     def generate_checkerboard(self, update_mask_inner, improve_z_mask_inner, update_mask_base_inner):
-        checkerboard = torch.ones((1, 1, 128 // 2, 128 // 2)).to(self.device) # 64 -> 128
+        checkerboard = torch.ones((1, 1, 64 // 2, 64 // 2)).to(self.device) # 64 -> 128
         # Create a checkerboard grid
         checkerboard[:, :, ::2, ::2] = 0
         checkerboard[:, :, 1::2, 1::2] = 0
         
-        # checkerboard = F.interpolate(checkerboard,
-        #                              (512, 512))
-        # checker_mask = F.interpolate(update_mask_inner, (512, 512))
-        # only_old_mask = F.interpolate(torch.bitwise_and(improve_z_mask_inner == 1,
-        #                                                 update_mask_base_inner == 0).float(), (512, 512))
-        
         checkerboard = F.interpolate(checkerboard,
-                                     (1024, 1024))
-        checker_mask = F.interpolate(update_mask_inner, (1024, 1024))
+                                     (256, 256))
+        checker_mask = F.interpolate(update_mask_inner, (256, 256))
         only_old_mask = F.interpolate(torch.bitwise_and(improve_z_mask_inner == 1,
-                                                        update_mask_base_inner == 0).float(), (1024, 1024))
+                                                        update_mask_base_inner == 0).float(), (256, 256))
+        
         
         checker_mask[only_old_mask == 1] = checkerboard[only_old_mask == 1]
         return checker_mask
