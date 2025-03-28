@@ -104,7 +104,7 @@ class LogConfig:
     # Experiment name
     exp_name: str
     # Experiment output dir
-    exp_root: Path = Path('experiments/SDXL_4G_T86')
+    exp_root: Path = Path('experiments/SDXL_4G_T88')
     # Run only test
     eval_only: bool = False
     # Number of angles to sample for eval during training

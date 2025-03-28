@@ -601,7 +601,7 @@ class TEXTureGrid:
                 refine_mask = refine_masks[i]
 
             elif i == 1:
-                update_mask, refine_mask, _ = self.calculate_trimap_ref(
+                update_mask, refine_mask, _ = self.calculate_trimap_rk(
                     rgb_render_raw=rgb_render_raw,
                     depth_render=depth_renders[i],
                     z_normals=z_normals_list[i],
@@ -612,7 +612,7 @@ class TEXTureGrid:
                 )
 
             elif i == 2:
-                update_mask, refine_mask, _ = self.calculate_trimap_ref(
+                update_mask, refine_mask, _ = self.calculate_trimap_rk(
                     rgb_render_raw=rgb_render_raw,
                     depth_render=depth_renders[i],
                     z_normals=z_normals_list[i],
@@ -623,7 +623,7 @@ class TEXTureGrid:
                 )
 
             elif i == 3:
-                update_mask_90, refine_mask_90, _ = self.calculate_trimap_ref(
+                update_mask_90, refine_mask_90, _ = self.calculate_trimap_rk(
                     rgb_render_raw=rgb_render_raw,
                     depth_render=depth_renders[i],
                     z_normals=z_normals_list[i],
@@ -632,7 +632,7 @@ class TEXTureGrid:
                     mask=object_masks[i],
                     prev_texture_mask=prev_texture_mask
                 )
-                update_mask_270, refine_mask_270, _ = self.calculate_trimap_ref(
+                update_mask_270, refine_mask_270, _ = self.calculate_trimap_rk(
                     rgb_render_raw=rgb_render_raw,
                     depth_render=depth_renders[i],
                     z_normals=z_normals_list[i],
