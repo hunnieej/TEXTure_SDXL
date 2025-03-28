@@ -895,7 +895,7 @@ class TEXTureGrid:
 
         # update_mask는 오직 refine_mask만 포함
         update_mask = refine_mask.clone()
-        update_mask[torch.bitwise_and(object_mask == 0, generate_mask == 1)] = 0
+        update_mask[torch.bitwise_and(object_mask == 0, generate_mask == 0)] = 0
 
         if self.cfg.log.log_images:
             trimap_vis = utils.color_with_shade(color=[112 / 255.0, 173 / 255.0, 71 / 255.0], z_normals=z_normals)
