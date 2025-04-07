@@ -617,8 +617,7 @@ class TEXTureGrid:
                     z_normals=z_normals_list[i],
                     z_normals_cache=z_normals_caches[i],  # 정면 기준
                     edited_mask=edited_masks[i],
-                    mask=object_masks[i],
-                    prev_texture_mask=prev_texture_mask
+                    mask=object_masks[i]
                 )
 
             elif i == 2:
@@ -628,8 +627,7 @@ class TEXTureGrid:
                     z_normals=z_normals_list[i],
                     z_normals_cache=z_normals_caches[i],  # 정면 기준
                     edited_mask=edited_masks[i],
-                    mask=object_masks[i],
-                    prev_texture_mask=prev_texture_mask
+                    mask=object_masks[i]
                 )
 
             elif i == 3:
@@ -639,8 +637,7 @@ class TEXTureGrid:
                     z_normals=z_normals_list[i],
                     z_normals_cache=z_normals_caches[i],  # 90도 기준
                     edited_mask=edited_masks[i],
-                    mask=object_masks[i],
-                    prev_texture_mask=prev_texture_mask
+                    mask=object_masks[i]
                 )
 
             update_masks[i] = update_mask
@@ -783,14 +780,14 @@ class TEXTureGrid:
     def calculate_trimap_ref(self, rgb_render_raw: torch.Tensor,
                             depth_render: torch.Tensor,
                             z_normals: torch.Tensor, z_normals_cache: torch.Tensor, edited_mask: torch.Tensor,
-                            mask: torch.Tensor, prev_texture_mask: Optional[torch.Tensor] = None):
+                            mask: torch.Tensor):
         # 기본 generate mask 생성 (default color 기준)
         diff = (rgb_render_raw.detach() - torch.tensor(self.mesh_model.default_color).view(1, 3, 1, 1).to(self.device)).abs().sum(axis=1)
         exact_generate_mask = (diff < 0.1).float().unsqueeze(0)
 
         generate_mask_z_norm = (torch.abs(z_normals - z_normals_cache[:, :1, :, :]) > self.cfg.guide.z_update_thr).float()
         combined_generate_mask = torch.clamp(exact_generate_mask + generate_mask_z_norm, 0, 1)
- 
+
         # Extend mask
         generate_mask = torch.from_numpy(
             cv2.dilate(combined_generate_mask[0, 0].detach().cpu().numpy(), np.ones((31, 31), np.uint8))).to(
@@ -804,39 +801,32 @@ class TEXTureGrid:
         ).to(object_mask.device).unsqueeze(0).unsqueeze(0)
 
         generate_mask = generate_mask * object_mask
-        update_mask = generate_mask.clone()
-        refine_mask = torch.zeros_like(update_mask)
+        refine_mask = torch.zeros_like(generate_mask)
 
-        # # NOTE : T4
-        if prev_texture_mask is not None:
-            prev_mask_resized = F.interpolate(prev_texture_mask, size=generate_mask.shape[-2:], mode='nearest')
+        # keep mask = object 영역 중 generate 제외
+        keep_mask = ((object_mask == 1) & (generate_mask == 0)).float()
 
-            # 1. keep mask 정의 (object 안에서 prev texture만 있는 영역)
-            keep_mask = torch.zeros_like(object_mask)
-            keep_mask[(prev_mask_resized > 0) & (object_mask == 1)] = 1
+        # generate 영역과의 경계 구하기
+        generate_mask_np = generate_mask[0, 0].cpu().numpy().astype(np.uint8)
+        keep_mask_np = keep_mask[0, 0].cpu().numpy().astype(np.uint8)
 
-            # 2. generate 영역과의 경계 구하기
-            generate_mask_np = generate_mask[0, 0].cpu().numpy().astype(np.uint8)
-            keep_mask_np = keep_mask[0, 0].cpu().numpy().astype(np.uint8)
+        kernel = np.ones((41, 41), np.uint8)
+        dilate_gen = cv2.dilate(generate_mask_np, kernel)
+        dilate_keep = cv2.dilate(keep_mask_np, kernel)
 
-            # 둘 다 dilate → 경계 기준 양방향 확장
-            kernel = np.ones((41, 41), np.uint8)
-            dilate_gen = cv2.dilate(generate_mask_np, kernel)
-            dilate_keep = cv2.dilate(keep_mask_np, kernel)
+        intersect = cv2.bitwise_and(dilate_gen, dilate_keep)
+        boundary_gen = cv2.dilate(intersect, np.ones((11, 11), np.uint8))
+        boundary_keep = cv2.dilate(intersect, np.ones((11, 11), np.uint8))
+        boundary_np = ((boundary_gen + boundary_keep) > 0).astype(np.uint8)
+        boundary_mask = torch.from_numpy(boundary_np).to(generate_mask.device).unsqueeze(0).unsqueeze(0)
 
-            boundary_np = ((dilate_gen + dilate_keep) == 2).astype(np.uint8)  # 경계 양쪽 모두 포괄
-            boundary_mask = torch.from_numpy(boundary_np).to(generate_mask.device).unsqueeze(0).unsqueeze(0)
+        # angle filter 적용
+        angle_filter = z_normals > 0.2
+        refine_candidate = boundary_mask * (generate_mask == 0).float() * object_mask
+        refine_mask = refine_candidate * angle_filter.float()
 
-            # 3. angle filter 적용
-            angle_filter = z_normals > 0.2
-            refine_candidate = boundary_mask * (generate_mask == 0).float() * object_mask
-            refine_mask = refine_candidate * angle_filter.float()
-            # refine_mask = boundary_mask * angle_filter.float()
-            # refine_mask[object_mask == 0] = 0  # 바깥쪽 제거
-
-        # Final update mask
-        update_mask[refine_mask == 1] = 1
-        update_mask[torch.bitwise_and(object_mask == 0, generate_mask == 0)] = 0
+        # Final update mask = generate + refine
+        update_mask = torch.clamp(generate_mask + refine_mask, max=1.0)
 
         if self.cfg.log.log_images:
             trimap_vis = utils.color_with_shade(color=[112 / 255.0, 173 / 255.0, 71 / 255.0], z_normals=z_normals)
