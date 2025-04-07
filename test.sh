@@ -2,6 +2,7 @@
 
 # YAML 파일 경로 리스트
 yaml_files=(
+    "configs/text_guided_split/rabbit_6.yaml"
     # "configs/text_guided_split/alien_1.yaml"
     # "configs/text_guided_split/alien_2.yaml"
     # "configs/text_guided_split/alien_3.yaml"
@@ -19,7 +20,6 @@ yaml_files=(
     # "configs/text_guided_split/nascar_5.yaml"
     # "configs/text_guided_split/rabbit_1.yaml"
     # "configs/text_guided_split/rabbit_2.yaml"
-    "configs/text_guided_split/rabbit_6.yaml"
     # "configs/text_guided_split/rabbit_7.yaml"
     # "configs/text_guided_split/rabbit_3.yaml"
     # "configs/text_guided_split/rabbit_4.yaml"

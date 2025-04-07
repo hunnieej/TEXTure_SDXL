@@ -18,22 +18,15 @@ from tqdm import tqdm
 from src import utils
 from src.configs.train_config import TrainConfig
 from src.models.textured_mesh import TexturedMeshModel
-from src.stable_diffusion_depth import StableDiffusion #Base TEXTure
-from src.stable_diffusion_depth_sdxl_inpaint import StableDiffusion_inpaintXL #SDv2_Depth + SDXL inpaint 1.0
-from src.sdxl_depth import SDXL #SDXL base 1.0 + SDXL inpaint 1.0
+from src.stable_diffusion_depth import StableDiffusion
 from src.training.views_dataset import ViewsDataset, MultiviewDataset
 from src.utils import make_path, tensor2numpy
-
-import time # texture generation time calculation
-import os
-from pathlib import Path
 
 
 class TEXTure:
     def __init__(self, cfg: TrainConfig):
         self.cfg = cfg
         self.paint_step = 0
-        os.environ['CUDA_VISIBLE_DEVICES'] = '0' # set CUDA_VISIBLE_DEVICES to 0
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
         utils.seed_everything(self.cfg.optim.seed)
@@ -48,9 +41,7 @@ class TEXTure:
         self.init_logger()
         pyrallis.dump(self.cfg, (self.exp_path / 'config.yaml').open('w'))
 
-        # NOTE : left right -> side / overhead -> top down / bottom -> below
         self.view_dirs = ['front', 'left', 'back', 'right', 'overhead', 'bottom']
-        # self.view_dirs = ['front', 'side', 'back', 'side', 'top down', 'below']
         self.mesh_model = self.init_mesh_model()
         self.diffusion = self.init_diffusion()
         self.text_z, self.text_string = self.calc_text_embeddings()
@@ -77,8 +68,6 @@ class TEXTure:
         return model
 
     def init_diffusion(self) -> Any:
-        # diffusion model로 stable_diffusion_depth.py의 StableDiffusion 클래스 사용
-        # Original Code : Stable Diffusion v2
         diffusion_model = StableDiffusion(self.device, model_name=self.cfg.guide.diffusion_name,
                                           concept_name=self.cfg.guide.concept_name,
                                           concept_path=self.cfg.guide.concept_path,
@@ -87,32 +76,11 @@ class TEXTure:
                                           max_timestep=self.cfg.optim.max_timestep,
                                           no_noise=self.cfg.optim.no_noise,
                                           use_inpaint=True)
-        
-        # New model : SDv2_depth + SDXL inpaint 1.0
-        # diffusion_model = StableDiffusion_inpaintXL(self.device, model_name=self.cfg.guide.diffusion_name,
-        #                                   concept_name=self.cfg.guide.concept_name,
-        #                                   concept_path=self.cfg.guide.concept_path,
-        #                                   latent_mode=False,
-        #                                   min_timestep=self.cfg.optim.min_timestep,
-        #                                   max_timestep=self.cfg.optim.max_timestep,
-        #                                   no_noise=self.cfg.optim.no_noise,
-        #                                   use_inpaint=True)
-        
-        # New model : SDXL base 1.0
-        # diffusion_model = SDXL(self.device, model_name=self.cfg.guide.diffusion_name,
-        #                                   concept_name=self.cfg.guide.concept_name,
-        #                                   concept_path=self.cfg.guide.concept_path,
-        #                                   latent_mode=False,
-        #                                   min_timestep=self.cfg.optim.min_timestep,
-        #                                   max_timestep=self.cfg.optim.max_timestep,
-        #                                   no_noise=self.cfg.optim.no_noise,
-        #                                   use_inpaint=True, use_autodepth=False)
 
         for p in diffusion_model.parameters():
             p.requires_grad = False
         return diffusion_model
 
-    # original code
     def calc_text_embeddings(self) -> Union[torch.Tensor, List[torch.Tensor]]:
         ref_text = self.cfg.guide.text
         if not self.cfg.guide.append_direction:
@@ -148,10 +116,8 @@ class TEXTure:
         logger.add(lambda msg: tqdm.write(msg, end=""), colorize=True, format=log_format)
         logger.add(self.exp_path / 'log.txt', colorize=False, format=log_format)
 
-    
     def paint(self):
         logger.info('Starting training ^_^')
-        start_time = time.time() # start time for texture generation
         # Evaluate the initialization
         self.evaluate(self.dataloaders['val'], self.eval_renders_path)
         self.mesh_model.train()
@@ -163,54 +129,15 @@ class TEXTure:
             self.paint_step += 1
             pbar.update(1)
             self.paint_viewpoint(data)
-            self.evaluate(self.dataloaders['val'], self.eval_renders_path) #결과물 저장
+            self.evaluate(self.dataloaders['val'], self.eval_renders_path)
             self.mesh_model.train()
 
         self.mesh_model.change_default_to_median()
         logger.info('Finished Painting ^_^')
-
-        elapsed_time = time.time() - start_time # calculate elapsed time
-        logger.info(f'Texture generation time: {elapsed_time} seconds') # log elapsed time
-
         logger.info('Saving the last result...')
         self.full_eval()
         logger.info('\tDone!')
-    
-    '''
-    def paint(self):
-        logger.info('Starting training ^_^')
-        # Evaluate the initialization
-        self.evaluate(self.dataloaders['val'], self.eval_renders_path)
-        # TexturedMeshModle to training Mode <-> self.mesh_model.eval()
-        self.mesh_model.train()
 
-        pbar = tqdm(total=len(self.dataloaders['train']), initial=self.paint_step,
-                    bar_format='{desc}: {percentage:3.0f}% painting step {n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}]')
-
-        #self.dataloaders : train, val, val_large dict
-        #train 에는 Mesh, Phi, theta등 카메라 뷰 parameter 포함됨
-        for data in self.dataloaders['train']:
-            if self.paint_step == 0:
-                self.paint_step += 1
-                pbar.update(1)
-                self.paint_viewpoint_initial(data)
-                self.evaluate(self.dataloaders['val'], self.eval_renders_path)
-                self.mesh_model.train()
-
-            else :
-                self.paint_step += 1
-                pbar.update(1)
-                self.paint_viewpoint(data)
-                self.evaluate(self.dataloaders['val'], self.eval_renders_path)
-                self.mesh_model.train()
-
-        self.mesh_model.change_default_to_median()
-        logger.info('Finished Painting ^_^')
-        logger.info('Saving the last result...')
-        self.full_eval()
-        logger.info('\tDone!')
-    '''
-    
     def evaluate(self, dataloader: DataLoader, save_path: Path, save_as_video: bool = False):
         logger.info(f'Evaluating and saving model, painting iteration #{self.paint_step}...')
         self.mesh_model.eval()
@@ -262,16 +189,15 @@ class TEXTure:
 
             logger.info(f"\tDone!")
 
-    def  paint_viewpoint(self, data: Dict[str, Any]):
+    def paint_viewpoint(self, data: Dict[str, Any]):
         logger.info(f'--- Painting step #{self.paint_step} ---')
         theta, phi, radius = data['theta'], data['phi'], data['radius']
         # If offset of phi was set from code
         phi = phi - np.deg2rad(self.cfg.render.front_offset)
         phi = float(phi + 2 * np.pi if phi < 0 else phi)
         logger.info(f'Painting from theta: {theta}, phi: {phi}, radius: {radius}')
-        #Code 작동 log 살펴보면, theta radius는 고정값이고 phi만 변하는 것을 확인할 수 있음
 
-        # Set background image -> red brick wall로 설정되어 있음
+        # Set background image
         if self.cfg.guide.use_background_color:
             background = torch.Tensor([0, 0.8, 0]).to(self.device)
         else:
@@ -282,13 +208,13 @@ class TEXTure:
         # Render from viewpoint
         outputs = self.mesh_model.render(theta=theta, phi=phi, radius=radius, background=background)
         render_cache = outputs['render_cache']
-        rgb_render_raw = outputs['image']  # Render where missing values have special color [1, 3, 1200, 1200]
-        depth_render = outputs['depth'] #[1, 1, 1200, 1200]
+        rgb_render_raw = outputs['image']  # Render where missing values have special color
+        depth_render = outputs['depth']
         # Render again with the median value to use as rgb, we shouldn't have color leakage, but just in case
         outputs = self.mesh_model.render(background=background,
                                          render_cache=render_cache, use_median=self.paint_step > 1)
-        rgb_render = outputs['image'] # [1, 3, 1200, 1200]
-        # Render meta texture map -> Image Transfer에서 사용
+        rgb_render = outputs['image']
+        # Render meta texture map
         meta_output = self.mesh_model.render(background=torch.Tensor([0, 0, 0]).to(self.device),
                                              use_meta_texture=True, render_cache=render_cache)
 
@@ -329,10 +255,8 @@ class TEXTure:
         # Crop to inner region based on object mask
         min_h, min_w, max_h, max_w = utils.get_nonzero_region(outputs['mask'][0, 0])
         crop = lambda x: x[:, :, min_h:max_h, min_w:max_w]
-        # rgb render : diffusion input 1
-        cropped_rgb_render = crop(rgb_render) # [1, 3, H, W]
+        cropped_rgb_render = crop(rgb_render)
         cropped_depth_render = crop(depth_render)
-
         cropped_update_mask = crop(update_mask)
         self.log_train_image(cropped_rgb_render, name='cropped_input')
 
@@ -340,7 +264,6 @@ class TEXTure:
         if self.paint_step > 1 or self.cfg.guide.initial_texture is not None:
             checker_mask = self.generate_checkerboard(crop(update_mask), crop(refine_mask),
                                                       crop(generate_mask))
-            # NOTE :SDXL 1024x1024로 변경
             self.log_train_image(F.interpolate(cropped_rgb_render, (512, 512)) * (1 - checker_mask),
                                  'checkerboard_input')
         self.diffusion.use_inpaint = self.cfg.guide.use_inpainting and self.paint_step > 1
@@ -377,13 +300,11 @@ class TEXTure:
         theta = data['theta']
         phi = data['phi']
         radius = data['radius']
-        # phi 만 연산을 통해 변화 input phi 값은 동일, 순서가 영향이 있을까?
         phi = phi - np.deg2rad(self.cfg.render.front_offset)
         phi = float(phi + 2 * np.pi if phi < 0 else phi)
         dim = self.cfg.render.eval_grid_size
         outputs = self.mesh_model.render(theta=theta, phi=phi, radius=radius,
                                          dims=(dim, dim), background='white')
-        #view(camera) space Normal을 사용
         z_normals = outputs['normals'][:, -1:, :, :].clamp(0, 1)
         rgb_render = outputs['image']  # .permute(0, 2, 3, 1).contiguous().clamp(0, 1)
         diff = (rgb_render.detach() - torch.tensor(self.mesh_model.default_color).view(1, 3, 1, 1).to(
@@ -480,20 +401,16 @@ class TEXTure:
 
         return update_mask, generate_mask, refine_mask
 
-    # NOTE : Kernel Size 조절 필요(250304)
     def generate_checkerboard(self, update_mask_inner, improve_z_mask_inner, update_mask_base_inner):
-        checkerboard = torch.ones((1, 1, 64 // 2, 64 // 2)).to(self.device) # 64 -> 128
+        checkerboard = torch.ones((1, 1, 64 // 2, 64 // 2)).to(self.device)
         # Create a checkerboard grid
         checkerboard[:, :, ::2, ::2] = 0
         checkerboard[:, :, 1::2, 1::2] = 0
-        
         checkerboard = F.interpolate(checkerboard,
-                                     (256, 256))
-        checker_mask = F.interpolate(update_mask_inner, (256, 256))
+                                     (512, 512))
+        checker_mask = F.interpolate(update_mask_inner, (512, 512))
         only_old_mask = F.interpolate(torch.bitwise_and(improve_z_mask_inner == 1,
-                                                        update_mask_base_inner == 0).float(), (256, 256))
-        
-        
+                                                        update_mask_base_inner == 0).float(), (512, 512))
         checker_mask[only_old_mask == 1] = checkerboard[only_old_mask == 1]
         return checker_mask
 
@@ -502,11 +419,11 @@ class TEXTure:
                      z_normals_cache: torch.Tensor):
         object_mask = torch.from_numpy(
             cv2.erode(object_mask[0, 0].detach().cpu().numpy(), np.ones((5, 5), np.uint8))).to(
-            object_mask.device).unsqueeze(0).unsqueeze(0) # 5->11
+            object_mask.device).unsqueeze(0).unsqueeze(0)
         render_update_mask = object_mask.clone()
 
         render_update_mask[update_mask == 0] = 0
-        # 25 -> 51
+
         blurred_render_update_mask = torch.from_numpy(
             cv2.dilate(render_update_mask[0, 0].detach().cpu().numpy(), np.ones((25, 25), np.uint8))).to(
             render_update_mask.device).unsqueeze(0).unsqueeze(0)
