@@ -786,7 +786,7 @@ class TEXTureGrid:
         exact_generate_mask = (diff < 0.1).float().unsqueeze(0)
 
         generate_mask_z_norm = (torch.abs(z_normals - z_normals_cache[:, :1, :, :]) > self.cfg.guide.z_update_thr).float()
-        combined_generate_mask = torch.clamp(exact_generate_mask + generate_mask_z_norm, 0, 1)
+        combined_generate_mask = ((exact_generate_mask == 1) | (generate_mask_z_norm == 1)).float()
 
         # Extend mask
         generate_mask = torch.from_numpy(
@@ -823,10 +823,10 @@ class TEXTureGrid:
         # angle filter 적용
         angle_filter = z_normals > 0.2
         refine_candidate = boundary_mask * (generate_mask == 0).float() * object_mask
-        refine_mask = refine_candidate * angle_filter.float()
+        refine_mask = refine_candidate * (angle_filter == 1).float()
 
         # Final update mask = generate + refine
-        update_mask = torch.clamp(generate_mask + refine_mask, max=1.0)
+        update_mask = ((generate_mask == 1) | (refine_mask == 1)).float()
 
         if self.cfg.log.log_images:
             trimap_vis = utils.color_with_shade(color=[112 / 255.0, 173 / 255.0, 71 / 255.0], z_normals=z_normals)
