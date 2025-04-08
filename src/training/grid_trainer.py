@@ -790,61 +790,56 @@ class TEXTureGrid:
 
         # Extend mask
         generate_mask = torch.from_numpy(
-            cv2.dilate(combined_generate_mask[0, 0].detach().cpu().numpy(), np.ones((31, 31), np.uint8))).to(
+            cv2.dilate(combined_generate_mask[0, 0].detach().cpu().numpy(), np.ones((15, 15), np.uint8))).to(
             combined_generate_mask.device).unsqueeze(0).unsqueeze(0)
 
         # object mask: depth = 0 인 부분 제외
         object_mask = torch.ones_like(generate_mask)
         object_mask[depth_render == 0] = 0
         object_mask = torch.from_numpy(
-            cv2.erode(object_mask[0, 0].cpu().numpy(), np.ones((31, 31), np.uint8))
+            cv2.erode(object_mask[0, 0].cpu().numpy(), np.ones((15, 15), np.uint8))
         ).to(object_mask.device).unsqueeze(0).unsqueeze(0)
 
-        generate_mask = generate_mask * object_mask
-        refine_mask = torch.zeros_like(generate_mask)
-
-        # keep mask = object 영역 중 generate 제외
+        # 1. generate & keep mask 추출
         keep_mask = ((object_mask == 1) & (generate_mask == 0)).float()
 
-        # generate 영역과의 경계 구하기
+        # 2. numpy 변환
         generate_mask_np = generate_mask[0, 0].cpu().numpy().astype(np.uint8)
         keep_mask_np = keep_mask[0, 0].cpu().numpy().astype(np.uint8)
 
-        kernel = np.ones((41, 41), np.uint8)
-        dilate_gen = cv2.dilate(generate_mask_np, kernel)
-        dilate_keep = cv2.dilate(keep_mask_np, kernel)
+        # 3. edge 추출
+        gen_edge = cv2.Canny(generate_mask_np * 255, 10, 150)
+        keep_edge = cv2.Canny(keep_mask_np * 255, 10, 150)
 
-        intersect = cv2.bitwise_and(dilate_gen, dilate_keep)
-        boundary_gen = cv2.dilate(intersect, np.ones((11, 11), np.uint8))
-        boundary_keep = cv2.dilate(intersect, np.ones((11, 11), np.uint8))
-        boundary_np = ((boundary_gen + boundary_keep) > 0).astype(np.uint8)
-        boundary_mask = torch.from_numpy(boundary_np).to(generate_mask.device).unsqueeze(0).unsqueeze(0)
+        # 4. 두 edge가 인접한 영역을 더해서 포함
+        combined_edge = cv2.add(gen_edge, keep_edge)
+        refine_zone = cv2.dilate(gen_edge, np.ones((31, 31), np.uint8))
+        # refine_zone = cv2.dilate(combined_edge, np.ones((71, 71), np.uint8))
 
-        # angle filter 적용
-        angle_filter = z_normals > 0.2
-        refine_candidate = boundary_mask * (generate_mask == 0).float() * object_mask
-        refine_mask = refine_candidate * (angle_filter == 1).float()
+        # 5. torch mask로 변환
+        refine_mask = torch.from_numpy(refine_zone > 0).to(generate_mask.device).unsqueeze(0).unsqueeze(0).float()
+        refine_mask = refine_mask * object_mask
 
-        # Final update mask = generate + refine
+        # 최종 update_mask
         update_mask = ((generate_mask == 1) | (refine_mask == 1)).float()
 
         if self.cfg.log.log_images:
             trimap_vis = utils.color_with_shade(color=[112 / 255.0, 173 / 255.0, 71 / 255.0], z_normals=z_normals)
             trimap_vis[mask.repeat(1, 3, 1, 1) == 0] = 1
-            trimap_vis = trimap_vis * (1 - exact_generate_mask) + utils.color_with_shade(
+            trimap_vis = trimap_vis * (1 - combined_generate_mask) + utils.color_with_shade(
                 [255 / 255.0, 22 / 255.0, 67 / 255.0],
                 z_normals=z_normals,
-                light_coef=0.7) * exact_generate_mask
+                light_coef=0.7) * combined_generate_mask
 
             shaded_rgb_vis = rgb_render_raw.detach()
-            shaded_rgb_vis = shaded_rgb_vis * (1 - exact_generate_mask) + utils.color_with_shade([0.85, 0.85, 0.85],
+            shaded_rgb_vis = shaded_rgb_vis * (1 - combined_generate_mask) + utils.color_with_shade([0.85, 0.85, 0.85],
                                                                                                  z_normals=z_normals,
-                                                                                                 light_coef=0.7) * exact_generate_mask
+                                                                                                 light_coef=0.7) * combined_generate_mask
 
             if self.paint_step > -1 or self.cfg.guide.initial_texture is not None:
                 refinement_color_shaded = utils.color_with_shade(color=[91 / 255.0, 155 / 255.0, 213 / 255.0],
                                                                  z_normals=z_normals)
-                only_old_mask_for_vis = torch.bitwise_and(refine_mask == 1, exact_generate_mask == 0).float().detach()
+                only_old_mask_for_vis = torch.bitwise_and(refine_mask == 1, combined_generate_mask == 0).float().detach()
                 trimap_vis = trimap_vis * 0 + 1.0 * (trimap_vis * (
                         1 - only_old_mask_for_vis) + refinement_color_shaded * only_old_mask_for_vis)
             self.log_train_image(shaded_rgb_vis, 'shaded_input_init')
@@ -1014,7 +1009,7 @@ class TEXTureGrid:
         blurred_render_update_mask = torch.from_numpy(
             cv2.dilate(render_update_mask[0, 0].detach().cpu().numpy(), np.ones((25, 25), np.uint8))).to(
             render_update_mask.device).unsqueeze(0).unsqueeze(0)
-        blurred_render_update_mask = utils.gaussian_blur(blurred_render_update_mask, 51, 23)
+        blurred_render_update_mask = utils.gaussian_blur(blurred_render_update_mask, 13, 7)
         blurred_render_update_mask[object_mask == 0] = 0
 
         if self.cfg.guide.strict_projection:
